@@ -18,23 +18,23 @@ function update(data) {
   var pump_state = pump.state;
 
   const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric"
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
   };
   let message_time = new Date(data.message_time).toLocaleString('en-GB',
     options);
 
-  document.getElementById("icon").src = "/static/img/" + icon + ".png";
-  document.getElementById("temp").innerText = temp + ' °C';
-  document.getElementById("depth").innerText = depth + ' mm';
-  document.getElementById("volume").innerText = volume + ' litres';
-  document.getElementById("pump_state").innerText = 'Pump ' + pump_state;
-  document.getElementById("message_time").innerText = message_time;
+  document.getElementById('icon').src = '/static/img/' + icon + '.png';
+  document.getElementById('temp').innerText = temp + ' °C';
+  document.getElementById('depth').innerText = depth + ' mm';
+  document.getElementById('volume').innerText = volume + ' litres';
+  document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
+  document.getElementById('message_time').innerText = message_time;
 
   var json = JSON.stringify(data, undefined, 4);
   json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
@@ -56,7 +56,7 @@ function update(data) {
       }
       return '<span class="' + cls + '">' + match + '</span>';
     });
-  //document.getElementById("message_raw").innerHTML = json;
+  //document.getElementById('message_raw').innerHTML = json;
 }
 
 
@@ -72,7 +72,7 @@ function request(url, callback) {
   // Creating Our XMLHttpRequest object
   var xhr = new XMLHttpRequest();
   // Making our connection
-  xhr.open("GET", url, true);
+  xhr.open('GET', url, true);
   // function execute after request is successful
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -104,7 +104,7 @@ document.onvisibilitychange = () => {
     update_timeout = setTimeout(update_status, next_update());
   }
 };
-document.getElementById("main").addEventListener("click", update_status);
+document.getElementById('main').addEventListener('click', update_status);
 
 function make_value(value, col_info) {
   if (col_info.type === 'date') {
@@ -122,11 +122,11 @@ function make_value(value, col_info) {
   if (col_info.type === 'seconds') {
     var minutes = Math.floor(value / 60);
     var seconds = value - minutes * 60;
-    value = "" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    value = '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
   }
 
   if (col_info.units) {
-    value += col_info.units;
+    value += ' ' + col_info.units;
   }
   return value;
 
