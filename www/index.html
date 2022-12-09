@@ -124,11 +124,12 @@
         year: "numeric",
         month: "long",
         day: "numeric",
-	hour: "numeric",
-	minute: "numeric",
-	second: "numeric"
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
       };
-      let message_time = new Date(data.message_time).toLocaleString('en-GB', options);
+      let message_time = new Date(data.message_time).toLocaleString('en-GB',
+        options);
 
       document.getElementById("icon").src = "/img/" + icon + ".png"
       document.getElementById("temp").innerText = temp;
