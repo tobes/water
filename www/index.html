@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Water System</title>
+    <link rel="static/stylesheet" href="style.css">
+<style>
+div {
+	text-align:center;
+}
+	#message_raw {
+	text-align:left;
+	max-width: 200px;
+	margin: auto;
+	}
+.j_string { color: green; }
+.j_number { color: darkorange; }
+.j_boolean { color: blue; }
+.j_null { color: magenta; }
+.j_key { color: red; }
+</style>
+  </head>
+  <body>
+	  <div id="main">
+	  <h1>Water System</h1>
+
+	  <div>
+		  <div><span id="temp">-</span>°C</div>
+		  <img id="icon">
+		  <div><span id="depth"></span> mm</div>
+		  <div><span id="volume"></span> litres</div>
+		  <div><span id="pump_state"></span></div>
+		  <div id="message_time"></div>
+	  </div>
+
+	  <div>
+		  <pre id="message_raw"></pre>
+	  </div>
+	  </div>
+	<script>
+var update_timeout;
+var last_update = 0;
+const UPDATE_INTERVAL = 1000 * 60 * 15;
+
+function update(data) {
+
+  //console.log(data);
+  var w = data.weather.state;
+  var temp = w.main.temp;
+  var icon = w.weather[0].icon;
+  var sensor = data['sensor 1'];
+  var depth = sensor.depth;
+  var volume = sensor.volume;
+  var pump = data['pump 1'];
+  var pump_state = pump.state
+
+  document.getElementById("icon").src = "/img/" + icon + ".png"
+  document.getElementById("temp").innerHTML = temp;
+  document.getElementById("depth").innerHTML = depth;
+  document.getElementById("volume").innerHTML = volume;
+  document.getElementById("pump_state").innerHTML = pump_state;
+  document.getElementById("message_time").innerHTML = data.message_time;
+
+  var json = JSON.stringify(data, undefined, 4);
+  json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+    var cls = 'j_number';
+    if (/^"/.test(match)) {
+      if (/:$/.test(match)) {
+        cls = 'j_key';
+      } else {
+        cls = 'j_string';
+      }
+    } else if (/true|false/.test(match)) {
+      cls = 'j_boolean';
+    } else if (/null/.test(match)) {
+      cls = 'j_null';
+    }
+    return '<span class="' + cls + '">' + match + '</span>';
+  });
+  document.getElementById("message_raw").innerHTML = json;
+}
+
+
+function next_update() {
+  var now = new Date().getTime()
+  if (now - last_update >= UPDATE_INTERVAL) {
+    return 0;
+  }
+  return UPDATE_INTERVAL - now % UPDATE_INTERVAL
+}
+
+function request(url, callback) {
+  // Creating Our XMLHttpRequest object
+  var xhr = new XMLHttpRequest();
+  // Making our connection
+  xhr.open("GET", url, true);
+  // function execute after request is successful
+  xhr.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      callback(JSON.parse(this.responseText));
+    }
+  }
+  // Sending our request
+  xhr.send();
+}
+
+function update_status() {
+  if (update_timeout) {
+    clearTimeout(update_timeout);
+  }
+  request('/status', update);
+
+  last_update = new Date().getTime()
+  update_timeout = setTimeout(update_status, next_update())
+}
+
+document.onvisibilitychange = () => {
+  if (document.visibilityState === 'hidden') {
+    if (update_timeout) {
+      clearTimeout(update_timeout);
+    }
+
+  } else {
+
+    update_timeout = setTimeout(update_status, next_update())
+  }
+};
+document.getElementById("main").addEventListener("click", update_status);
+
+function update_stats(data) {
+  if (!data.length){
+    return;
+  }
+  let table = document.createElement('table');
+  let tr = document.createElement('tr');
+  table.appendChild(tr);
+  for (const key in data[0]){
+    let th = document.createElement('th');
+    th.innerText = key;
+    tr.appendChild(th);
+  data.forEach(row => {
+    let tr = document.createElement('tr');
+    table.appendChild(tr);
+    for (const key in row){
+      let td = document.createElement('td');
+      td.innerText = row[key];
+      tr.appendChild(td);
+    }
+
+  });
+
+  document.body.appendChild(table);
+		  }
+}
+
+function stats() {
+  request('/stats', update_stats);
+  request('/stats_pump', update_stats);
+  request('/stats_weather', update_stats);
+}
+
+update_status();
+stats();
+
+	</script>
+  </body>
+</html>

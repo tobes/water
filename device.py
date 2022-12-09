@@ -1,0 +1,219 @@
+import json
+import os
+import statistics
+import time
+import threading
+
+from urllib.parse import urlencode
+from urllib.request import urlopen
+
+import pigpio
+
+import db
+import config
+import util
+
+
+try:
+    f = open('/var/run/pigpio.pid')
+    f.close()
+except IOError:
+    os.system('sudo pigpiod')
+    print('starting pigpio')
+    time.sleep(1)
+    print('pigpio started')
+
+
+p = pigpio.pi()
+
+
+
+class Device:
+    pass
+
+
+class Weather:
+    
+    def __init__(self):
+        self.thread = None
+        self.update_time = None
+        self.state = None
+        self.get_weather()
+
+    def get_weather(self, save=False):
+        query_data = {
+            'lat': config.LAT,
+            'lon': config.LON,
+            'appid': config.WEATHER_API_KEY,
+            'units': 'metric',
+        }
+
+        query_string = urlencode(query_data)
+        try:
+            content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
+
+            self.state = json.loads(content)
+            self.update_time = util.timestamp()
+            if save:
+                db.save_data(
+                    'weather',
+                    json=content,
+                    datestamp=util.timestamp()
+                )
+            print(content)
+        except Exception as e:
+            print('ERROR:',e)
+        kwargs = dict(save=True)
+        util.thread_runner(self.get_weather, config.WEATHER_INTERVAL, kwargs=kwargs)
+
+    def status(self):
+        out = {
+            'state': self.state,
+            'update_time': self.update_time,
+        }
+        return out
+
+
+class Relay:
+    
+    def __init__(self, gpio):
+        self.gpio = gpio
+        self.thread = None
+        self.state = 'OFF'
+        self.pump_seconds=0
+        self.off_time = 0
+        self.update_time = None
+        p.set_mode(gpio, pigpio.OUTPUT)
+        p.write(gpio, 1)
+
+    def pump_off(self):
+        if self.thread:
+            self.thread.cancel()
+        p.write(self.gpio, 1)
+        print('pump off')
+        self.state = 'OFF'
+        self.update_time = util.timestamp()
+
+        db.save_data(
+            'pumps',
+            pump=1,
+            datestamp=self.update_time,
+            action='OFF',
+            duration=self.pump_seconds,
+        )
+        self.pump_seconds=0
+
+    def pump_on(self, seconds):
+        p.write(self.gpio, 0)
+        print('pump on')
+        self.state = 'ON'
+        self.update_time = util.timestamp()
+        self.off_time = time.time() + seconds
+        self.thread = threading.Timer(seconds, self.pump_off)
+        self.thread.start()
+        self.pump_seconds=seconds
+
+        db.save_data(
+            'pumps',
+            pump=1,
+            datestamp=self.update_time,
+            action='ON',
+            duration=seconds,
+        )
+
+    def status(self):
+        out = {
+            'state': self.state,
+            'update_time': self.update_time,
+        }
+        now = time.time()
+        if now > self.off_time:
+            remaining = 0
+        else:
+            remaining = int(self.off_time - now)
+        out['remaining'] = remaining
+        return out
+
+
+class Meter:
+
+    def __init__(self, gpio_trigger, gpio_echo, **kw):
+        self.gpio_trigger = gpio_trigger
+        self.gpio_echo = gpio_echo
+        self.pulse_start = 0
+        self.pulse_end = 0
+        self.max_distance = 875
+        self.total_volume = 200
+        self.min_distance = 105
+        self.distance = 0
+        self.accuracy = 0
+        self.update_time = None
+        self.ticks = []
+        self.save=False
+        self.thread = None
+
+        p.set_mode(gpio_trigger, pigpio.OUTPUT)
+        p.write(gpio_trigger, 0)
+        p.set_mode(gpio_echo, pigpio.INPUT)
+        p.set_pull_up_down(gpio_echo, pigpio.PUD_DOWN)
+
+        def cbf_pulse_length(gpio, level, tick):
+            if level:
+                self.pulse_start = tick
+            else:
+                pulse_end = tick
+                self.ticks.append(pigpio.tickDiff(self.pulse_start, pulse_end))
+                if len(self.ticks) < config.METER_TICKS:
+                    time.sleep(0.03)
+                    p.gpio_trigger(self.gpio_trigger, 10, 1)
+                else:
+                    cut = (config.METER_TICKS - 1) // 2
+
+                    ticks = sorted(self.ticks)[cut:-cut]
+                    self.distance = int(sum(ticks) / len(ticks) * 0.1715)
+                    self.distance2 = int(statistics.geometric_mean(self.ticks) * 0.1715)
+                    self.accuracy = round(statistics.pstdev(self.ticks), 2)
+                    self.update_time = util.timestamp()
+                    if self.save:
+                        db.save_data(
+                            'levels',
+                            sensor=1,
+                            datestamp=self.update_time,
+                            level=self.distance,
+                            level2=self.distance2,
+                            accuracy=self.accuracy,
+                        )
+
+                    if self.thread == None:
+                        seconds = (config.LEVEL_INTERVAL - (time.time() % config.LEVEL_INTERVAL))
+                        if seconds < 1:
+                            seconds += config.LEVEL_INTERVAL
+                        self.thread = threading.Timer(seconds, self.get_distance, kwargs=dict(save=True))
+                        self.thread.start()
+
+        p.callback(gpio_echo, pigpio.EITHER_EDGE, cbf_pulse_length)
+
+        self.get_distance()
+
+    def get_distance(self, save=False):
+        if self.thread:
+            self.thread.cancel()
+            self.thread = None
+        self.ticks = []
+        self.save = save
+        p.gpio_trigger(self.gpio_trigger, 10, 1)
+
+    def status(self):
+        self.get_distance()
+        self.max_distance = 875
+        self.total_volume = 200
+        self.min_distance = 105
+        depth = self.max_distance - self.distance2
+        volume = (depth / (self.max_distance - self.min_distance)) * self.total_volume
+        return {
+            'depth': depth, 
+            'volume': round(volume, 1), 
+            'distance': self.distance2,
+            'accuracy': self.accuracy,
+            'update_time': self.update_time,
+        }
