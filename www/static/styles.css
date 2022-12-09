@@ -2,6 +2,9 @@ div {
   text-align: center;
 }
 
+
+/* json */
+
 #message_raw {
   text-align: left;
   max-width: 200px;
@@ -28,6 +31,9 @@ div {
   color: red;
 }
 
+
+/* table */
+
 table {
   border-collapse: collapse;
   margin: 25px auto;
@@ -38,7 +44,7 @@ table {
 
 thead tr {
   background-color: #009879;
-  color: #ffffff;
+  color: #fff;
   text-align: left;
 }
 
@@ -48,7 +54,7 @@ td {
 }
 
 tbody tr {
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #ddd;
 }
 
 tbody tr:nth-of-type(even) {
