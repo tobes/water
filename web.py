@@ -13,10 +13,14 @@ static_path = path.join(dir_path, 'www/img')
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 
 
-def sql_query_2_json(sql):
+def sql_query_2_json(sql, cols):
     with db.run_sql(sql, row_factory=True) as result:
-        data = list(map(dict, result.fetchall()))
-    response = make_response(data)
+        values = list(map(list, result.fetchall()))
+    output = {
+        'cols': cols,
+        'values': values,
+    }
+    response = make_response(output)
     response.mimetype = 'application/json'
     return response
 
@@ -49,7 +53,12 @@ def stats_levels():
         WHERE accuracy <3
         GROUP BY date(datestamp);
     '''
-    return sql_query_2_json(sql)
+    cols = [
+       {'title': 'date', 'type':'date'},
+       {'title': 'max', 'type':'int', 'units': 'mm'},
+       {'title': 'min', 'type':'int', 'units': 'mm'},
+    ]
+    return sql_query_2_json(sql, cols)
 
 
 @app.route("/stats_pump")
@@ -58,13 +67,33 @@ def stats_pump():
         SELECT pump, date(datestamp) date, time(datestamp) as time, duration FROM pumps
         WHERE action = 'ON';
     '''
-    return sql_query_2_json(sql)
+    cols = [
+       {'title': 'date', 'type':'date'},
+       {'title': 'time', 'type':'time'},
+       {'title': 'duration', 'type':'int', 'units': 's'},
+    ]
+    return sql_query_2_json(sql, cols)
 
 
 @app.route("/stats_weather")
 def stats_weather():
     data = get_summary(days=-100)
-    response = make_response(data)
+
+    cols = [
+       {'title': 'date', 'type':'date'},
+       {'title': 'rain', 'type':'time'},
+       {'title': 'max temp', 'type':'float', 'units': '°C'},
+       {'title': 'min temp', 'type':'float', 'units': '°C'},
+    ]
+    values = [
+        [x['date'], x['rain'], x['temp_max'], x['temp_min']]
+        for x in data
+    ]
+    output = {
+        'cols': cols,
+        'values': values,
+    }
+    response = make_response(output)
     response.mimetype = 'application/json'
     return response
 
