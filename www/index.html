@@ -119,13 +119,23 @@
       var pump = data['pump 1'];
       var pump_state = pump.state
 
-      document.getElementById("icon").src = "/img/" + icon + ".png"
-      document.getElementById("temp").innerHTML = temp;
-      document.getElementById("depth").innerHTML = depth;
-      document.getElementById("volume").innerHTML = volume;
-      document.getElementById("pump_state").innerHTML = pump_state;
-      document.getElementById("message_time").innerHTML = data.message_time;
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+	hour: "numeric",
+	minute: "numeric",
+	second: "numeric"
+      };
+      let message_time = new Date(data.message_time).toLocaleString('en-GB', options);
 
+      document.getElementById("icon").src = "/img/" + icon + ".png"
+      document.getElementById("temp").innerText = temp;
+      document.getElementById("depth").innerText = depth;
+      document.getElementById("volume").innerText = volume;
+      document.getElementById("pump_state").innerText = pump_state;
+      document.getElementById("message_time").innerText = message_time;
       return;
       var json = JSON.stringify(data, undefined, 4);
       json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
