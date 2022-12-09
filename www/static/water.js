@@ -36,6 +36,9 @@ function update(data) {
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
 
+}
+
+function show_json(data) {
   var json = JSON.stringify(data, undefined, 4);
   json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
     '&gt;');
@@ -55,8 +58,9 @@ function update(data) {
         cls = 'j_null';
       }
       return '<span class="' + cls + '">' + match + '</span>';
-    });
-  //document.getElementById('message_raw').innerHTML = json;
+    }
+  );
+  document.getElementById('message_raw').innerHTML = json;
 }
 
 
