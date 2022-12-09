@@ -89,10 +89,10 @@
     <h1>Water System</h1>
 
     <div>
-      <div><span id="temp">-</span>°C</div>
+      <div><span id="temp"></span></div>
       <img id="icon">
-      <div><span id="depth"></span> mm</div>
-      <div><span id="volume"></span> litres</div>
+      <div><span id="depth"></span></div>
+      <div><span id="volume"></span></div>
       <div><span id="pump_state"></span></div>
       <div id="message_time"></div>
     </div>
@@ -132,10 +132,10 @@
         options);
 
       document.getElementById("icon").src = "/img/" + icon + ".png"
-      document.getElementById("temp").innerText = temp;
-      document.getElementById("depth").innerText = depth;
-      document.getElementById("volume").innerText = volume;
-      document.getElementById("pump_state").innerText = pump_state;
+      document.getElementById("temp").innerText = temp + '°C';
+      document.getElementById("depth").innerText = depth + 'mm';
+      document.getElementById("volume").innerText = volume + 'litres';
+      document.getElementById("pump_state").innerText = 'Pump ' + pump_state;
       document.getElementById("message_time").innerText = message_time;
       return;
       var json = JSON.stringify(data, undefined, 4);
