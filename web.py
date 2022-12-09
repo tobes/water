@@ -51,7 +51,9 @@ def stats_levels():
                 max(level) as max, min(level) as min
         FROM levels
         WHERE accuracy <3
-        GROUP BY date(datestamp);
+        GROUP BY date(datestamp)
+        ORDER BY datestamp DESC;
+
     '''
     cols = [
        {'title': 'date', 'type':'date'},
@@ -65,13 +67,14 @@ def stats_levels():
 def stats_pump():
     sql = '''
         SELECT pump, date(datestamp) date, time(datestamp) as time, duration FROM pumps
-        WHERE action = 'ON';
+        WHERE action = 'ON'
+        ORDER BY datestamp DESC;
     '''
     cols = [
        {'title': 'pump', 'type':'str'},
        {'title': 'date', 'type':'date'},
        {'title': 'time', 'type':'time'},
-       {'title': 'duration', 'type':'int', 'units': 's'},
+       {'title': 'duration', 'type':'seconds'},
     ]
     return sql_query_2_json(sql, cols)
 
@@ -82,13 +85,13 @@ def stats_weather():
 
     cols = [
        {'title': 'date', 'type':'date'},
-       {'title': 'rain', 'type':'time'},
+       {'title': 'rain', 'type':'float', 'units':'mm'},
        {'title': 'max temp', 'type':'float', 'units': '°C'},
        {'title': 'min temp', 'type':'float', 'units': '°C'},
     ]
     values = [
         [x['date'], x['rain'], x['temp_max'], x['temp_min']]
-        for x in data
+        for x in reversed(data)
     ]
     output = {
         'cols': cols,
