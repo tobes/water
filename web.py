@@ -1,4 +1,4 @@
-import os.path as path
+import os.path
 import subprocess
 
 from flask import Flask, make_response, render_template
@@ -6,9 +6,9 @@ from flask import Flask, make_response, render_template
 import db
 from weather import get_summary
 
-dir_path = path.dirname(path.realpath(__file__))
-template_path = path.join(dir_path, 'www')
-static_path = path.join(dir_path, 'www/img')
+dir_path = os.path.dirname(os.path.realpath(__file__))
+template_path = os.path.join(dir_path, 'www')
+static_path = os.path.join(dir_path, 'www/static')
 
 app = Flask(__name__, template_folder=template_path, static_folder=static_path)
 
@@ -30,10 +30,9 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/img/<path:path>')
-def send_report(path):
-    img_path = path.join(dir_path, 'www/img')
-    return send_from_directory(img_path, path)
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory(static_path, path)
 
 
 @app.route("/status")
