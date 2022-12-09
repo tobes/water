@@ -37,6 +37,39 @@
     .j_key {
       color: red;
     }
+
+
+
+table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+th,td {
+    padding: 12px 15px;
+}
+tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+
   </style>
 </head>
 
@@ -173,6 +206,17 @@
     };
     document.getElementById("main").addEventListener("click", update_status);
 
+    function make_value(row, key){
+      let value = row[key];
+      if (key === 'date'){
+        value = new Date(value).toLocaleDateString();
+      }
+
+      return value;
+
+    }
+
+
     function update_stats(data)
     {
       if (!data.length)
@@ -180,28 +224,33 @@
         return;
       }
       let table = document.createElement('table');
+      let thead = document.createElement('thead');
+      table.appendChild(thead);
       let tr = document.createElement('tr');
-      table.appendChild(tr);
+      thead.appendChild(tr);
       for (const key in data[0])
       {
         let th = document.createElement('th');
         th.innerText = key;
         tr.appendChild(th);
-        data.forEach(row =>
-        {
-          let tr = document.createElement('tr');
-          table.appendChild(tr);
-          for (const key in row)
-          {
-            let td = document.createElement('td');
-            td.innerText = row[key];
-            tr.appendChild(td);
-          }
-
-        });
-
-        document.body.appendChild(table);
       }
+      let tbody = document.createElement('tbody');
+      table.appendChild(tbody);
+      data.forEach(row =>
+      {
+        let tr = document.createElement('tr');
+        tbody.appendChild(tr);
+        for (const key in row)
+        {
+          let value =make_value(row, key);
+          let td = document.createElement('td');
+          td.innerText = value;
+          tr.appendChild(td);
+        }
+
+      });
+
+      document.body.appendChild(table);
     }
 
     function stats()
