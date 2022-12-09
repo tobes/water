@@ -44,7 +44,7 @@
 
     table {
       border-collapse: collapse;
-      margin: 25px 0;
+      margin: 25px auto;
       font-size: 0.9em;
       font-family: sans-serif;
       min-width: 400px;
@@ -72,6 +72,15 @@
 
     tbody tr:last-of-type {
       border-bottom: 2px solid #009879;
+    }
+
+    th.int,
+    th.float,
+    th.seconds,
+    td.int,
+    td.float,
+    td.seconds {
+      text-align: right;
     }
   </style>
 </head>
@@ -118,6 +127,7 @@
       document.getElementById("pump_state").innerHTML = pump_state;
       document.getElementById("message_time").innerHTML = data.message_time;
 
+      return;
       var json = JSON.stringify(data, undefined, 4);
       json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
         '&gt;');
@@ -209,12 +219,34 @@
     };
     document.getElementById("main").addEventListener("click", update_status);
 
-    function make_value(row, key){
-      let value = row[key];
-      if (key === 'date'){
+    function make_value(value, col_info)
+    {
+      if (col_info.type === 'date')
+      {
         value = new Date(value).toLocaleDateString();
       }
 
+      if (col_info.type === 'time')
+      {
+        value = value.substring(0, 5);
+      }
+
+      if (col_info.type === 'float')
+      {
+        value = value.toFixed(2)
+      }
+
+      if (col_info.type === 'seconds')
+      {
+        var minutes = Math.floor(value / 60);
+        var seconds = value - minutes * 60;
+        value = "" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      }
+
+      if (col_info.units)
+      {
+        value += col_info.units;
+      }
       return value;
 
     }
@@ -222,31 +254,31 @@
 
     function update_stats(data)
     {
-      if (!data.length)
-      {
-        return;
-      }
+      const cols = data.cols
+      const values = data.values
       let table = document.createElement('table');
       let thead = document.createElement('thead');
       table.appendChild(thead);
       let tr = document.createElement('tr');
       thead.appendChild(tr);
-      for (const key in data[0])
+      for (const col of cols)
       {
         let th = document.createElement('th');
-        th.innerText = key;
+        th.innerText = col.title;
+        th.setAttribute('class', col.type);
         tr.appendChild(th);
       }
       let tbody = document.createElement('tbody');
       table.appendChild(tbody);
-      data.forEach(row =>
+      values.forEach(row =>
       {
         let tr = document.createElement('tr');
         tbody.appendChild(tr);
-        for (const key in row)
+        for (let i = 0; i < cols.length; i++)
         {
-          let value =make_value(row, key);
+          let value = make_value(row[i], cols[i]);
           let td = document.createElement('td');
+          td.setAttribute('class', cols[i].type);
           td.innerText = value;
           tr.appendChild(td);
         }
