@@ -23,7 +23,7 @@ def get_weather(save=False):
         db.save_data(
             'weather',
             json=content,
-            datestamp=util.timestamp()
+            date=util.timestamp()
         )
     return content
     kwargs = dict(save=True)
@@ -45,17 +45,17 @@ def get_summary(ts=None, days=-30):
         rain = 0
         temp_min = None
         temp_max = None
-        for json_data, datestamp in result:
-            if datestamp != current_date:
+        for json_data, date in result:
+            if date != current_date:
                 if current_date:
                     out.append({
-                        'datestamp': current_date,
+                        'date': current_date,
                         'rain': rain,
                         'temp_min': temp_min,
                         'temp_max': temp_max,
                     })
                 #print(current_date, rain, temp_min, temp_max)
-                current_date = datestamp
+                current_date = date
                 rain = 0
                 temp_min = None
                 temp_max = None
@@ -75,13 +75,13 @@ def get_summary(ts=None, days=-30):
                 temp_max = max(temp_max, main['temp_max'])
         #print(current_date, rain, temp_min, temp_max)
         out.append({
-            'datestamp': current_date,
+            'date': current_date,
             'rain': rain,
             'temp_min': temp_min,
             'temp_max': temp_max,
         })
     return out
-            
+
 
 def get_last_period(days=-1, **td):
     td['days'] = days
@@ -92,7 +92,7 @@ def get_last_period(days=-1, **td):
         rain = 0
         temp_min = None
         temp_max = None
-        for json_data, datestamp in result:
+        for json_data, date in result:
             data = json.loads(json_data)
             if 'rain' in data:
                 rain += data['rain']['1h']
