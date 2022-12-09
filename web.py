@@ -68,6 +68,7 @@ def stats_pump():
         WHERE action = 'ON';
     '''
     cols = [
+       {'title': 'pump', 'type':'str'},
        {'title': 'date', 'type':'date'},
        {'title': 'time', 'type':'time'},
        {'title': 'duration', 'type':'int', 'units': 's'},
