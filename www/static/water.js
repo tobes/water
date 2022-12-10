@@ -202,7 +202,8 @@ document.querySelectorAll('span.option').forEach(el => el.addEventListener('clic
 
 function init() {
   update_status();
-  request('/stats', update_stats, 'levels');
+  request('/stats_depth', update_stats, 'depth');
+  request('/stats_volume', update_stats, 'volume');
   request('/stats_pump', update_stats, 'pump');
   request('/stats_weather', update_stats, 'weather');
 }
