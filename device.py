@@ -170,7 +170,7 @@ class Meter:
     def __init__(self, gpio_trigger, gpio_echo, butt, **kw):
         self.gpio_trigger = gpio_trigger
         self.gpio_echo = gpio_echo
-        self.butt = butt
+        self.butt = Butt()
         self.pulse_start = 0
         self.pulse_end = 0
         self.distance = 0
