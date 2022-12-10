@@ -1,7 +1,11 @@
+* {
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
 div {
   text-align: center;
 }
-
 
 /* json */
 
@@ -31,14 +35,12 @@ div {
   color: red;
 }
 
-
 /* table */
 
 table {
   border-collapse: collapse;
-  margin: 25px auto;
+  margin: 2em auto;
   font-size: 0.9em;
-  font-family: sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -50,7 +52,7 @@ thead tr {
 
 th,
 td {
-  padding: 12px 15px;
+  padding: .5em 1em;
 }
 
 tbody tr {
@@ -72,4 +74,17 @@ td.int,
 td.float,
 td.seconds {
   text-align: right;
+}
+
+#options {
+  padding: 3em 1em 1em 1em;
+}
+
+span.option {
+  background-color:#ddd;
+  color: #fff;
+  padding: .5em 1em;
+}
+span.option.selected {
+  background-color: #009879;
 }

@@ -119,9 +119,29 @@ function make_value(value, col_info) {
 }
 
 
+function show_selected_table() {
+  let selected_option = document.querySelector('span.option.selected');
+  if (selected_option === null) {
+    return;
+  }
+
+  let selected = selected_option.dataset.select;
+
+  document.querySelectorAll('table').forEach(el => {
+    if (el.dataset.name === selected) {
+      el.style.display = 'table';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+
 function update_stats(data, stat) {
-  table = create_table(data);
-  document.body.appendChild(table);
+  let table = create_table(data);
+  table.dataset.name = stat;
+  table.style.display = 'none';
+  document.getElementById('tables').appendChild(table);
+  show_selected_table();
 }
 
 function create_table(data) {
@@ -154,10 +174,10 @@ function create_table(data) {
   return table;
 }
 
-function stats() {
-  request('/stats', update_stats, 'levels');
-  request('/stats_pump', update_stats, 'pump');
-  request('/stats_weather', update_stats, 'weather');
+function option_select(event) {
+  document.querySelectorAll('span.option').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+  show_selected_table();
 }
 
 
@@ -172,6 +192,13 @@ document.onvisibilitychange = () => {
 };
 
 document.getElementById('main').addEventListener('click', update_status);
+document.querySelectorAll('span.option').forEach(el => el.addEventListener('click', option_select));
 
-update_status();
-stats();
+function init() {
+  update_status();
+  request('/stats', update_stats, 'levels');
+  request('/stats_pump', update_stats, 'pump');
+  request('/stats_weather', update_stats, 'weather');
+}
+
+init();
