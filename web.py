@@ -22,6 +22,7 @@ def sql_query_2_json(sql, cols):
     }
     response = make_response(output)
     response.mimetype = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -40,6 +41,7 @@ def status():
     data = subprocess.run(['python3', 'client.py', 'status'], stdout=subprocess.PIPE).stdout
     response = make_response(data)
     response.mimetype = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
@@ -98,6 +100,7 @@ def stats_weather():
     }
     response = make_response(output)
     response.mimetype = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 
