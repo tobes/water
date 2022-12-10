@@ -7,7 +7,6 @@ const UPDATE_INTERVAL = 1000 * 60 * 15;
 
 function update(data) {
 
-  //console.log(data);
   var w = data.weather.state;
   var temp = w.main.temp;
   var icon = w.weather[0].icon;
@@ -35,7 +34,6 @@ function update(data) {
   document.getElementById('volume').innerText = volume + ' litres';
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
-
 }
 
 function show_json(data) {
@@ -64,14 +62,6 @@ function show_json(data) {
 }
 
 
-function next_update() {
-  var now = new Date().getTime();
-  if (now - last_update >= UPDATE_INTERVAL) {
-    return 0;
-  }
-  return UPDATE_INTERVAL - now % UPDATE_INTERVAL;
-}
-
 function request(url, callback, payload) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
@@ -83,28 +73,24 @@ function request(url, callback, payload) {
   xhr.send();
 }
 
+
+function next_update() {
+  var now = new Date().getTime();
+  if (now - last_update >= UPDATE_INTERVAL) {
+    return 0;
+  }
+  return UPDATE_INTERVAL - now % UPDATE_INTERVAL;
+}
+
+
 function update_status() {
   if (update_timeout) {
     clearTimeout(update_timeout);
   }
   request('/status', update);
-
   last_update = new Date().getTime();
   update_timeout = setTimeout(update_status, next_update());
 }
-
-document.onvisibilitychange = () => {
-  if (document.visibilityState === 'hidden') {
-    if (update_timeout) {
-      clearTimeout(update_timeout);
-    }
-
-  } else {
-
-    update_timeout = setTimeout(update_status, next_update());
-  }
-};
-document.getElementById('main').addEventListener('click', update_status);
 
 function make_value(value, col_info) {
   if (col_info.type === 'date') {
@@ -133,7 +119,12 @@ function make_value(value, col_info) {
 }
 
 
-function update_stats(data) {
+function update_stats(data, stat) {
+  table = create_table(data);
+  document.body.appendChild(table);
+}
+
+function create_table(data) {
   const cols = data.cols;
   const values = data.values;
   let table = document.createElement('table');
@@ -159,17 +150,28 @@ function update_stats(data) {
       td.innerText = value;
       tr.appendChild(td);
     }
-
   });
-
-  document.body.appendChild(table);
+  return table;
 }
 
 function stats() {
-  request('/stats', update_stats);
-  request('/stats_pump', update_stats);
-  request('/stats_weather', update_stats);
+  request('/stats', update_stats, 'levels');
+  request('/stats_pump', update_stats, 'pump');
+  request('/stats_weather', update_stats, 'weather');
 }
+
+
+document.onvisibilitychange = () => {
+  if (document.visibilityState === 'hidden') {
+    if (update_timeout) {
+      clearTimeout(update_timeout);
+    }
+  } else {
+    update_timeout = setTimeout(update_status, next_update());
+  }
+};
+
+document.getElementById('main').addEventListener('click', update_status);
 
 update_status();
 stats();
