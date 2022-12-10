@@ -78,14 +78,14 @@ td.seconds {
 }
 
 #options {
-  padding: 3em 1em 1em 1em;
+  margin-top: 1em;
 }
 
 span.option {
   background-color:#ddd;
   color: #fff;
   padding: .5em 2em;
-  display: inline-block;
+  display: none;
   margin:.5em auto;
 }
 span.option.selected {

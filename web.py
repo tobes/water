@@ -61,14 +61,15 @@ def process_levels(wanted):
                 levels_min[wanted],
             ])
         return output
+    return process
 
 @app.route("/stats_depth")
 def stats_depths():
     sql = '''
         SELECT date(datestamp) as date,
-                max(level) as max, min(level) as min
+                max(level2) as max, min(level2) as min
         FROM levels
-        WHERE accuracy <2
+        WHERE accuracy = 0
         GROUP BY date(datestamp)
         ORDER BY datestamp DESC;
 
@@ -85,9 +86,9 @@ def stats_depths():
 def stats_volumes():
     sql = '''
         SELECT date(datestamp) as date,
-                max(level) as max, min(level) as min
+                max(level2) as max, min(level2) as min
         FROM levels
-        WHERE accuracy <2
+        WHERE accuracy = 0
         GROUP BY date(datestamp)
         ORDER BY datestamp DESC;
 
@@ -97,7 +98,7 @@ def stats_volumes():
        {'title': 'max', 'type':'float', 'units': 'litres'},
        {'title': 'min', 'type':'float', 'units': 'litres'},
     ]
-    return sql_query_2_json(sql=sql, cols=cols, process=process_levels('volumes'))
+    return sql_query_2_json(sql=sql, cols=cols, process=process_levels('volume'))
 
 
 @app.route("/stats_pump")
