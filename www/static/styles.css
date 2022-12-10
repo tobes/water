@@ -53,6 +53,7 @@ thead tr {
 th,
 td {
   padding: .5em 1em;
+  text-align: left;
 }
 
 tbody tr {

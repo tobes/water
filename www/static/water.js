@@ -3,6 +3,7 @@
 var update_timeout;
 let last_update = 0;
 
+const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 15;
 
 function update(data) {
@@ -25,7 +26,7 @@ function update(data) {
     minute: 'numeric',
     second: 'numeric'
   };
-  let message_time = new Date(data.message_time).toLocaleString('en-GB',
+  let message_time = new Date(data.message_time).toLocaleString(LOCALE,
     options);
 
   document.getElementById('icon').src = '/static/img/' + icon + '.png';
@@ -94,7 +95,12 @@ function update_status() {
 
 function make_value(value, col_info) {
   if (col_info.type === 'date') {
-    value = new Date(value).toLocaleDateString();
+    const options = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    };
+    value = new Date(value).toLocaleString(LOCALE, options);
   }
 
   if (col_info.type === 'time') {
@@ -102,7 +108,7 @@ function make_value(value, col_info) {
   }
 
   if (col_info.type === 'float') {
-    value = value.toFixed(2);
+    value = value.toFixed(1);
   }
 
   if (col_info.type === 'seconds') {
