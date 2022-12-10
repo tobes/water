@@ -7,25 +7,40 @@ import threading
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-import pigpio
+try:
+    import pigpio
+except ModuleNotFoundError:
+    print('pigpio not found!')
+    pigpio = None
 
 import db
 import config
 import util
 
 
-try:
-    f = open('/var/run/pigpio.pid')
-    f.close()
-except IOError:
-    os.system('sudo pigpiod')
-    print('starting pigpio')
-    time.sleep(1)
-    print('pigpio started')
 
+if pigpio:
+    # start pigpio service
+    try:
+        f = open('/var/run/pigpio.pid')
+        f.close()
+    except IOError:
+        os.system('sudo pigpiod')
+        print('starting pigpio')
+        time.sleep(1)
+        print('pigpio started')
 
-p = pigpio.pi()
+    p = pigpio.pi()
+else:
+    # allow running without pigpio for development reasons
+    class Null:
+        def __getattr__(self, attr):
+            def fn(*args, **kw):
+                pass
+            return fn
 
+    p = Null()
+    pigpio = Null()
 
 
 class Device:
