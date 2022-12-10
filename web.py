@@ -61,6 +61,7 @@ def process_levels(wanted):
                 levels_min[wanted],
             ])
         return output
+    return process
 
 @app.route("/stats_depth")
 def stats_depths():
