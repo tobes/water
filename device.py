@@ -47,8 +47,23 @@ class Device:
     pass
 
 
+class Butt:
+    def __init__(self):
+        self.max_distance = 875
+        self.total_volume = 200
+        self.min_distance = 105
+
+    def calculate_stats(self, distance):
+        depth = self.max_distance - distance
+        volume = (depth / (self.max_distance - self.min_distance)) * self.total_volume
+        return {
+            'depth': depth,
+            'volume': round(volume, 1),
+        }
+
+
 class Weather:
-    
+
     def __init__(self):
         self.thread = None
         self.update_time = None
@@ -90,7 +105,7 @@ class Weather:
 
 
 class Relay:
-    
+
     def __init__(self, gpio):
         self.gpio = gpio
         self.thread = None
@@ -152,14 +167,12 @@ class Relay:
 
 class Meter:
 
-    def __init__(self, gpio_trigger, gpio_echo, **kw):
+    def __init__(self, gpio_trigger, gpio_echo, butt, **kw):
         self.gpio_trigger = gpio_trigger
         self.gpio_echo = gpio_echo
+        self.butt = butt
         self.pulse_start = 0
         self.pulse_end = 0
-        self.max_distance = 875
-        self.total_volume = 200
-        self.min_distance = 105
         self.distance = 0
         self.accuracy = 0
         self.update_time = None
@@ -220,14 +233,10 @@ class Meter:
 
     def status(self):
         self.get_distance()
-        self.max_distance = 875
-        self.total_volume = 200
-        self.min_distance = 105
-        depth = self.max_distance - self.distance2
-        volume = (depth / (self.max_distance - self.min_distance)) * self.total_volume
+        butt_data = self.butt.calculate_stats(self.distance2)
         return {
-            'depth': depth, 
-            'volume': round(volume, 1), 
+            'depth': butt_data['depth'],
+            'volume': butt_data['volume'],
             'distance': self.distance2,
             'accuracy': self.accuracy,
             'update_time': self.update_time,
