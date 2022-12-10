@@ -84,7 +84,9 @@ td.seconds {
 span.option {
   background-color:#ddd;
   color: #fff;
-  padding: .5em 1em;
+  padding: .5em 2em;
+  display: inline-block;
+  margin:.5em auto;
 }
 span.option.selected {
   background-color: #009879;
