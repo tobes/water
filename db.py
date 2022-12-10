@@ -35,7 +35,7 @@ sql_create = [
 '''
     CREATE TABLE IF NOT EXISTS auto(
         datestamp,
-        time INT
+        duration INT
     )
 ''',
 ]

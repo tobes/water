@@ -73,7 +73,7 @@ def pump(data):
 
         db.save_data(
             'auto',
-            time=duration,
+            duration=duration,
             datestamp=util.timestamp()
         )
     print(duration)
