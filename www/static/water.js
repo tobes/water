@@ -72,18 +72,14 @@ function next_update() {
   return UPDATE_INTERVAL - now % UPDATE_INTERVAL;
 }
 
-function request(url, callback) {
-  // Creating Our XMLHttpRequest object
+function request(url, callback, payload) {
   var xhr = new XMLHttpRequest();
-  // Making our connection
   xhr.open('GET', url, true);
-  // function execute after request is successful
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      callback(JSON.parse(this.responseText));
+      callback(JSON.parse(this.responseText), payload);
     }
   };
-  // Sending our request
   xhr.send();
 }
 
