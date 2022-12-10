@@ -72,7 +72,6 @@ def stats_depths():
         WHERE accuracy = 0
         GROUP BY date(datestamp)
         ORDER BY datestamp DESC;
-
     '''
     cols = [
        {'title': 'date', 'type':'date'},
@@ -91,7 +90,6 @@ def stats_volumes():
         WHERE accuracy = 0
         GROUP BY date(datestamp)
         ORDER BY datestamp DESC;
-
     '''
     cols = [
        {'title': 'date', 'type':'date'},
