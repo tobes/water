@@ -148,6 +148,7 @@ function update_stats(data, stat) {
   table.style.display = 'none';
   document.getElementById('tables').appendChild(table);
   show_selected_table();
+  document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
 }
 
 function create_table(data) {
