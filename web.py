@@ -99,6 +99,21 @@ def stats_volumes():
     return sql_query_2_json(sql=sql, cols=cols, process=process_levels('volume'))
 
 
+@app.route("/stats_auto")
+def stats_auto():
+    sql = '''
+        SELECT date(datestamp) date, time(datestamp) as time, duration
+        FROM auto
+        ORDER BY datestamp DESC;
+    '''
+    cols = [
+       {'title': 'date', 'type':'date'},
+       {'title': 'time', 'type':'time'},
+       {'title': 'duration', 'type':'seconds'},
+    ]
+    return sql_query_2_json(sql=sql, cols=cols)
+
+
 @app.route("/stats_pump")
 def stats_pump():
     sql = '''
