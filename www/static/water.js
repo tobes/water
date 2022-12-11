@@ -173,7 +173,10 @@ function update_stats(data, stat) {
   document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
 
   // delay showing to prevent flicker
-  setTimeout(() => document.getElementById('options').style.display = 'block', 500);
+  setTimeout(() => {
+    document.getElementById('options').style.display = 'block';
+    document.getElementById('tables').style.display = 'block';
+  }, 500);
 }
 
 function create_table(data) {
