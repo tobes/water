@@ -30,11 +30,12 @@ function update(data) {
     options);
 
   document.getElementById('icon').src = '/static/img/' + icon + '.png';
-  document.getElementById('temp').innerText = temp + ' °C';
-  document.getElementById('depth').innerText = depth + ' mm';
-  document.getElementById('volume').innerText = volume + ' litres';
+  document.getElementById('temp').innerText = temp;
+  document.getElementById('depth').innerText = depth;
+  document.getElementById('volume').innerText = volume;
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
+  document.getElementById('main_info').style.display = 'block';
 }
 
 function show_json(data) {
