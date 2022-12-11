@@ -93,7 +93,9 @@ function request(url, callback, payload) {
   xhr.open('GET', url, true);
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      callback(JSON.parse(this.responseText), payload);
+      if(this.responseText){
+        callback(JSON.parse(this.responseText), payload);
+      }
     }
   };
   xhr.send();
