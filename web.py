@@ -137,8 +137,8 @@ def stats_weather():
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'rain', 'type':'float', 'units':'mm'},
-       {'title': 'max temp', 'type':'float', 'units': '°C'},
-       {'title': 'min temp', 'type':'float', 'units': '°C'},
+       {'title': 'max', 'type':'float', 'units': '°C'},
+       {'title': 'min', 'type':'float', 'units': '°C'},
     ]
     values = [
         [x['date'], x['rain'], x['temp_max'], x['temp_min']]
