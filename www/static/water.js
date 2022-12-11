@@ -14,9 +14,23 @@ function update(data) {
   var sensor = data['sensor 1'];
   var depth = sensor.depth;
   var volume = sensor.volume;
+  var accuracy = sensor.accuracy;
   var pump = data['pump 1'];
   var pump_state = pump.state;
 
+  var accuracy_text;
+
+  if (accuracy === 0) {
+    accuracy_text = 'excellent';
+  } else if (accuracy < 0.5) {
+    accuracy_text = 'good';
+  } else if (accuracy < 2) {
+    accuracy_text = 'adaquate';
+  } else if (accuracy < 4) {
+    accuracy_text = 'poor';
+  } else {
+    accuracy_text = 'awful';
+  }
   const options = {
     weekday: 'long',
     year: 'numeric',
@@ -33,6 +47,8 @@ function update(data) {
   document.getElementById('temp').innerText = temp;
   document.getElementById('depth').innerText = depth;
   document.getElementById('volume').innerText = volume;
+  document.getElementById('accuracy').innerText = accuracy_text + ' accuracy';
+  document.getElementById('accuracy').className = accuracy_text;
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
   document.getElementById('main_info').style.display = 'block';

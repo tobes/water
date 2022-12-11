@@ -40,6 +40,37 @@ div {
   color: red;
 }
 
+#accuracy{
+  font-size:.75em;
+  padding: .2em 1em;
+  display: inline-block;
+}
+
+#accuracy.excellent{
+  background-color:green;
+  color:#fff;
+}
+
+#accuracy.good{
+  background-color:blue;
+  color:#fff;
+}
+
+#accuracy.adaquate{
+  background-color:lightblue;
+  color:#000;
+}
+
+#accuracy.poor{
+  background-color:orange;
+  color:#666;
+}
+
+#accuracy.awful{
+  background-color:red;
+  color:#000;
+}
+
 
 #main_info, #options {
   display:none;
