@@ -48,55 +48,37 @@ def status():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
-def process_levels(wanted):
-    def process(values):
-        output = []
-        butt = Butt()
-        for row in values:
-            levels_max = butt.calculate_stats(row[2])
-            levels_min = butt.calculate_stats(row[1])
-            output.append([
-                row[0],
-                levels_max[wanted],
-                levels_min[wanted],
-            ])
-        return output
-    return process
 
 @app.route("/stats_depth")
 def stats_depths():
     sql = '''
-        SELECT date(datestamp) as date,
-                max(level2) as max, min(level2) as min
-        FROM levels
-        WHERE accuracy = 0
-        GROUP BY date(datestamp)
-        ORDER BY datestamp DESC;
+        SELECT date, max_depth, min_depth, last_depth
+        FROM level_summary
+        ORDER BY date DESC;
     '''
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'max', 'type':'int', 'units': 'mm'},
        {'title': 'min', 'type':'int', 'units': 'mm'},
+       {'title': 'last', 'type':'int', 'units': 'mm'},
     ]
-    return sql_query_2_json(sql=sql, cols=cols, process=process_levels('depth'))
+    return sql_query_2_json(sql=sql, cols=cols)
 
 
 @app.route("/stats_volume")
 def stats_volumes():
     sql = '''
-        SELECT date(datestamp) as date,
-                max(level2) as max, min(level2) as min
-        FROM levels
-        WHERE accuracy = 0
-        GROUP BY date(datestamp)
-        ORDER BY datestamp DESC;
+        SELECT date, max_volume, min_volume, last_volume
+        FROM level_summary
+        ORDER BY date DESC;
     '''
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'max', 'type':'float', 'units': 'litres'},
        {'title': 'min', 'type':'float', 'units': 'litres'},
+       {'title': 'last', 'type':'float', 'units': 'litres'},
     ]
-    return sql_query_2_json(sql=sql, cols=cols, process=process_levels('volume'))
+    return sql_query_2_json(sql=sql, cols=cols)
 
 
 @app.route("/stats_auto")
@@ -132,19 +114,20 @@ def stats_pump():
 
 @app.route("/stats_weather")
 def stats_weather():
-    data = get_summary(days=-100)
+    sql = '''
+        SELECT date, temp_min, temp_max, rain
+        FROM weather_summary
+        ORDER BY date DESC;
+    '''
 
     cols = [
        {'title': 'date', 'type':'date'},
-       {'title': 'rain', 'type':'float', 'units':'mm'},
-       {'title': 'max', 'type':'float', 'units': '°C'},
        {'title': 'min', 'type':'float', 'units': '°C'},
+       {'title': 'max', 'type':'float', 'units': '°C'},
+       {'title': 'rain', 'type':'float', 'units':'mm'},
     ]
-    values = [
-        [x['date'], x['rain'], x['temp_max'], x['temp_min']]
-        for x in reversed(data)
-    ]
-    return sql_query_2_json(values=values, cols=cols)
+
+    return sql_query_2_json(sql=sql, cols=cols)
 
 
 if __name__ == "__main__":

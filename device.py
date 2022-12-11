@@ -70,7 +70,10 @@ class Weather:
         self.thread = None
         self.update_time = None
         self.state = None
+        self.day_summary = {}
         self.get_weather()
+
+        self.day_summary = db.update_recent_weather()[-1]
 
     def get_weather(self, save=False):
         query_data = {
@@ -92,6 +95,9 @@ class Weather:
                     json=content,
                     datestamp=util.timestamp()
                 )
+                # update summary table
+                updates = db.update_recent_weather()
+                self.day_summary = updates[-1]
             #print(content)
         except Exception as e:
             print('ERROR:',e)
@@ -104,6 +110,7 @@ class Weather:
     def status(self):
         out = {
             'state': self.state,
+            'day_summary': self.day_summary,
             'update_time': self.update_time,
         }
         return out
