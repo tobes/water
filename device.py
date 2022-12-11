@@ -172,7 +172,7 @@ class Relay:
     def auto(self, action=False):
         w = weather.get_last_period()
         # if we have no weather info don't process
-        if w['temp_max'] is not None:
+        if  action and w['temp_max'] is not None:
             # Check minimum temperatures
             if (
                     w['temp_max'] < config.AUTO_MIN_TEMP_MAX or
