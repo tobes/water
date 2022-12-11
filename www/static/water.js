@@ -17,7 +17,7 @@ function update(data) {
   var accuracy = sensor.accuracy;
   var pump = data['pump 1'];
   var pump_state = pump.state;
-  var msg_time = data.message_time
+  var msg_time = data.message_time;
 
   var accuracy_text;
 
@@ -253,7 +253,7 @@ document.onvisibilitychange = () => {
 
 document.addEventListener('scroll', move_scroll_top);
 
-document.getElementById('scroll_top').addEventListener('click', scroll_top);;
+document.getElementById('scroll_top').addEventListener('click', scroll_top);
 document.getElementById('main').addEventListener('click', update_status);
 document.querySelectorAll('span.option').forEach(el => el.addEventListener('click', option_select));
 
