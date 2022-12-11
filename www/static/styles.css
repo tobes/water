@@ -35,6 +35,10 @@ div {
   color: red;
 }
 
+.units {
+ color:#666;
+ padding-left:.25em;
+}
 /* table */
 
 table {
