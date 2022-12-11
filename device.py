@@ -252,7 +252,7 @@ class Meter:
                 pulse_end = tick
                 self.ticks.append(pigpio.tickDiff(self.pulse_start, pulse_end))
                 if len(self.ticks) < config.METER_TICKS:
-                    time.sleep(0.03)
+                    time.sleep(config.METER_REPEAT_DELAY)
                     p.gpio_trigger(self.gpio_trigger, 10, 1)
                 else:
                     cut = (config.METER_TICKS - 1) // 2
