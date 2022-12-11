@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 
 def timestamp(**td):
-    """ 
+    """
     return datetime in ISO format without microseconds
 
     **td can give a timedelta offset  eg days=1
@@ -15,7 +15,7 @@ def timestamp(**td):
     return (datetime.now() + td).replace(microsecond=0).isoformat(sep=' ')
 
 def timestamp_zeroed(**td):
-    """ 
+    """
     return datetime in ISO format without microseconds.
     always at 00:00:00
 
@@ -33,11 +33,12 @@ def timestamp_zeroed(**td):
 
 
 
-def thread_runner(function, interval, kwargs=None): 
+def thread_runner(function, interval=None, seconds=None, kwargs=None):
     """ spawn a thread to run function at interval """
-    seconds = (interval - (time.time() % interval))
-    if seconds < 1:
-        seconds += interval
+    if interval:
+        seconds = (interval - (time.time() % interval))
+        if seconds < 1:
+            seconds += interval
     thread = threading.Timer(seconds, function, kwargs=kwargs)
     thread.start()
     return thread

@@ -26,8 +26,6 @@ def get_weather(save=False):
             date=util.timestamp()
         )
     return content
-    kwargs = dict(save=True)
-    util.thread_runner(get_weather, config.WEATHER_INTERVAL, kwargs=kwargs)
 
 
 

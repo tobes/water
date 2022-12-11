@@ -65,6 +65,8 @@ function show_json(data) {
 
 
 function request(url, callback, payload) {
+  url = 'https://tollington.duckdns.org/' + url;
+  //url = 'http://192.168.1.7:5000/' + url;
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
   xhr.onreadystatechange = function() {

@@ -4,6 +4,7 @@ import statistics
 import time
 import threading
 
+from datetime import datetime, timedelta
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -16,6 +17,7 @@ except ModuleNotFoundError:
 import db
 import config
 import util
+import weather
 
 
 
@@ -90,11 +92,14 @@ class Weather:
                     json=content,
                     datestamp=util.timestamp()
                 )
-            print(content)
+            #print(content)
         except Exception as e:
             print('ERROR:',e)
+
+    def auto(self, save=False):
+        self.get_weather()
         kwargs = dict(save=True)
-        util.thread_runner(self.get_weather, config.WEATHER_INTERVAL, kwargs=kwargs)
+        util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
 
     def status(self):
         out = {
@@ -164,6 +169,61 @@ class Relay:
         out['remaining'] = remaining
         return out
 
+    def auto(self, action=False):
+        w = weather.get_last_period()
+        # if we have no weather info don't process
+        if w['temp_max'] is not None:
+            # Check minimum temperatures
+            if (
+                    w['temp_max'] < config.AUTO_MIN_TEMP_MAX or
+                    w['temp_min'] < config.AUTO_MIN_TEMP_MIN
+            ):
+                duration = 0
+                print('cold')
+            else:
+                sql = '''
+                    SELECT datestamp FROM pumps WHERE action="ON"
+                    ORDER BY datestamp DESC LIMIT 1
+                '''
+                with db.run_sql(sql, row_factory=True) as result:
+                    datestamp = result.fetchone()['datestamp']
+                    d1 = datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
+                    days = 1 + (datetime.now() - d1).days
+               # datestamp = '2022-10-21'
+                weather_summary = weather.get_summary(ts=datestamp)
+                rain = 0
+                for v in weather_summary:
+                    # each day we reduce the eefective rain
+                    rain = max(0, rain - config.AUTO_IGNORED_WATER_PER_DAY)
+                    # add the rain for that day
+                    rain += v['rain']
+                if rain <= config.AUTO_MIN_RAIN:
+                    rain = 0
+
+                duration = (config.AUTO_SECONDS_PER_DEGREE * w['temp_max'])
+                duration -= config.AUTO_SECONDS_PER_MM_RAIN * rain
+
+                if duration > 0:
+                    duration = max(duration, config.AUTO_MIN_SECONDS)
+                    duration = min(duration, config.AUTO_MAX_SECONDS)
+
+            db.save_data(
+                'auto',
+                duration=duration,
+                datestamp=util.timestamp()
+            )
+
+        now = datetime.now()
+        wanted = now.replace(
+                hour=config.AUTO_HOUR,
+                minute=config.AUTO_MINUTE,
+                second=0,
+                microsecond=0
+        )
+        if wanted < now:
+            wanted += timedelta(days=1)
+        delay = (wanted - now).total_seconds()
+        util.thread_runner(self.auto, seconds=delay, kwargs={'action': True})
 
 class Meter:
 
