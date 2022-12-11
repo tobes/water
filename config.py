@@ -30,5 +30,5 @@ AUTO_SECONDS_PER_MM_RAIN = 10  # reduce pump time per mm of rain over AUTO_MIN_R
 AUTO_IGNORED_WATER_PER_DAY = 5 # ignore this much water per day since rain
 
 
-AUTO_HOUR = 12
-AUTO_MINUTE = 5
+AUTO_HOUR = 19
+AUTO_MINUTE = 0
