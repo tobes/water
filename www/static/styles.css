@@ -42,7 +42,7 @@ div {
 
 
 
-#message_time {
+#message_time, #temp_div {
   color:#999;
   font-size:2em;
 }
