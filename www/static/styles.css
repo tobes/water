@@ -4,8 +4,7 @@
 }
 
 body {
-
-  margin-bottom:6em;
+  margin-bottom: 6em;
 }
 
 div {
@@ -40,53 +39,54 @@ div {
   color: red;
 }
 
-
-
-#message_time, #temp_div {
-  color:#999;
-  font-size:2em;
+#message_time,
+#temp_div {
+  color: #999;
+  font-size: 2em;
 }
 
-#accuracy{
-  font-size:.75em;
+#accuracy {
+  font-size: .75em;
   padding: .2em 1em;
   display: inline-block;
 }
 
-#accuracy.excellent{
-  background-color:green;
-  color:#fff;
+#accuracy.excellent {
+  background-color: green;
+  color: #fff;
 }
 
-#accuracy.good{
-  background-color:blue;
-  color:#fff;
+#accuracy.good {
+  background-color: blue;
+  color: #fff;
 }
 
-#accuracy.adaquate{
-  background-color:lightblue;
-  color:#000;
+#accuracy.adaquate {
+  background-color: lightblue;
+  color: #000;
 }
 
-#accuracy.poor{
-  background-color:orange;
-  color:#666;
+#accuracy.poor {
+  background-color: orange;
+  color: #666;
 }
 
-#accuracy.awful{
-  background-color:red;
-  color:#000;
+#accuracy.awful {
+  background-color: red;
+  color: #000;
 }
 
-
-#main_info, #options, #tables {
-  display:none;
+#main_info,
+#options,
+#tables {
+  display: none;
 }
 
 .units {
- color:#666;
- padding-left:.25em;
+  color: #666;
+  padding-left: .25em;
 }
+
 /* table */
 
 table {
@@ -134,36 +134,37 @@ td.seconds {
 }
 
 span.option {
-  background-color:#999;
+  background-color: #999;
   color: #fff;
   padding: .5em 2em;
   display: none;
-  margin:.5em auto;
+  margin: .5em auto;
 }
+
 span.option.selected {
   background-color: #009879;
 }
 
-#scroll_top div{
+#scroll_top div {
   position: relative;
   top: 50%;
   transform: translateY(-50%);
 }
 
-#scroll_top img{
-  height:1.5em;
-  width:1.5em;
-  color:#fff;
+#scroll_top img {
+  height: 1.5em;
+  width: 1.5em;
+  color: #fff;
 }
 
 #scroll_top {
-  color:#fff;
+  color: #fff;
   background-color: #009879;
-  position:fixed;
-  width:3em;
-  height:3em;
-  border-radius:1.5em;
+  position: fixed;
+  width: 3em;
+  height: 3em;
+  border-radius: 1.5em;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   bottom: 2em;
-  right:2em;
+  right: 2em;
 }
