@@ -118,9 +118,6 @@ function make_value(value, col_info) {
     value = '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
   }
 
-  if (col_info.units) {
-    value += ' ' + col_info.units;
-  }
   return value;
 
 }
@@ -179,6 +176,12 @@ function create_table(data) {
       let td = document.createElement('td');
       td.setAttribute('class', cols[i].type);
       td.innerText = value;
+      if (cols[i].units) {
+        let units = document.createElement('span');
+        units.innerText = cols[i].units;
+        units.classList.add('units');
+        td.append(units);
+      }
       tr.appendChild(td);
     }
   });
