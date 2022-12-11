@@ -189,6 +189,25 @@ function option_select(event) {
   show_selected_table();
 }
 
+function move_scroll_top() {
+  let el = document.getElementById('scroll_top');
+  if (window.scrollY < 50) {
+    el.style.display = 'none';
+  } else {
+    el.style.display = 'block';
+  }
+}
+
+function scroll_top() {
+  if ('scrollBehavior' in document.documentElement.style) {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  } else {
+    window.scrollTo(0, 0);
+  }
+}
 
 document.onvisibilitychange = () => {
   if (document.visibilityState === 'hidden') {
@@ -200,6 +219,9 @@ document.onvisibilitychange = () => {
   }
 };
 
+document.addEventListener('scroll', move_scroll_top);
+
+document.getElementById('scroll_top').addEventListener('click', scroll_top);;
 document.getElementById('main').addEventListener('click', update_status);
 document.querySelectorAll('span.option').forEach(el => el.addEventListener('click', option_select));
 
@@ -210,6 +232,7 @@ function init() {
   request('/stats_volume', update_stats, 'volume');
   request('/stats_pump', update_stats, 'pump');
   request('/stats_weather', update_stats, 'weather');
+  move_scroll_top();
 }
 
 init();
