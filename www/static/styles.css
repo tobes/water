@@ -40,6 +40,13 @@ div {
   color: red;
 }
 
+
+
+#message_time {
+  color:#999;
+  font-size:2em;
+}
+
 #accuracy{
   font-size:.75em;
   padding: .2em 1em;

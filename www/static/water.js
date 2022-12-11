@@ -17,6 +17,7 @@ function update(data) {
   var accuracy = sensor.accuracy;
   var pump = data['pump 1'];
   var pump_state = pump.state;
+  var msg_time = data.message_time
 
   var accuracy_text;
 
@@ -31,17 +32,21 @@ function update(data) {
   } else {
     accuracy_text = 'awful';
   }
-  const options = {
+  const options_date = {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+  };
+  let message_date = new Date(msg_time).toLocaleString(LOCALE, options_date);
+
+  const options_time = {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric'
   };
-  let message_time = new Date(data.message_time).toLocaleString(LOCALE,
-    options);
+
+  let message_time = new Date(msg_time).toLocaleString(LOCALE, options_time);
 
   document.getElementById('icon').src = '/static/img/' + icon + '.png';
   document.getElementById('temp').innerText = temp;
@@ -51,6 +56,7 @@ function update(data) {
   document.getElementById('accuracy').className = accuracy_text;
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
+  document.getElementById('message_date').innerText = message_date;
   document.getElementById('main_info').style.display = 'block';
 }
 
