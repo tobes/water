@@ -152,6 +152,9 @@ function update_stats(data, stat) {
   document.getElementById('tables').appendChild(table);
   show_selected_table();
   document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
+
+  // delay showing to prevent flicker
+  setTimeout(() => document.getElementById('options').style.display = 'block', 500);
 }
 
 function create_table(data) {

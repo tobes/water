@@ -40,6 +40,11 @@ div {
   color: red;
 }
 
+
+#main_info, #options {
+  display:none;
+}
+
 .units {
  color:#666;
  padding-left:.25em;
