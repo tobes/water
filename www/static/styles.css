@@ -75,10 +75,7 @@ div {
   color: #000;
 }
 
-#main_info,
-#options,
-#display,
-#tables {
+#main_info{
   display: none;
 }
 
@@ -131,32 +128,16 @@ td.seconds {
   text-align: right;
 }
 
-#options {
+
+div.buttons {
   margin-top: 1em;
 }
 
-span.option {
-  width: 6em;
-  background-color: #999;
-  color: #fff;
-  padding: .5em 0;
-  display: none;
-  margin: .5em auto;
+#visualization {
+  display:none;
 }
 
-span.option.selected {
-  background-color: #009879;
-}
-
-#charts {
-  width: 100%;
-}
-
-#display {
-  margin-top: 1em;
-}
-
-span.display {
+div.buttons span {
   width: 6em;
   background-color: #999;
   color: #fff;
@@ -165,7 +146,7 @@ span.display {
   display: inline-block;
 }
 
-span.display.selected {
+div.buttons span.selected {
   background-color: #009879;
 }
 

@@ -174,35 +174,31 @@ function show_selected_table() {
 
 
 function show_selected() {
-  let selected_option = document.querySelector('span.option.selected');
-  let selected_display = document.querySelector('span.display.selected');
-  if (selected_option === null || selected_display === null) {
+
+  let selected_option = document.querySelector('[data-type=stat].selected');
+  let selected_display = document.querySelector('[data-type=display].selected');
+  let selected_period = document.querySelector('[data-type=period].selected');
+  if (selected_option === null || selected_display === null || selected_period === null) {
     return;
   }
 
-  let selected = selected_option.dataset.select;
-  let display = selected_display.dataset.select;
-  let days = 7;
+  let stat = selected_option.dataset.value;
+  let display = selected_display.dataset.value;
+  let period = selected_period.dataset.value;
 
+  let visualization;
   if (display === 'graph') {
-    document.getElementById('charts').style.display = 'block';
+    visualization = document.createElement('div');
+    visualization.appendChild(create_graph(stat, period));
   } else {
-    document.getElementById('charts').style.display = 'none';
+    visualization = create_table(stat, period);
   }
-
-  document.querySelectorAll('table').forEach(el => {
-    if (display === 'table' && el.dataset.name === selected) {
-      el.style.display = 'table';
-    } else {
-      el.style.display = 'none';
-    }
-  });
-
-  document.querySelectorAll('canvas').forEach(el => {
-    if (display === 'graph' && el.dataset.name === selected) {
-      el.style.display = 'block';
-    } else {
-      el.style.display = 'none';
+  let data_div = document.getElementById('data')
+  data_div.appendChild(visualization);
+  graph_resize();
+  let child_nodes = data_div.childNodes.forEach(el => {
+    if (el !== visualization) {
+      el.remove();
     }
   });
 }
@@ -217,12 +213,16 @@ function cut_off_date(days) {
 function create_graph(stat, days = 7) {
   const data = data_cache[stat];
 
+  let cutoff = cut_off_date(days);
+
   let scales = {
     x: {
       type: 'time',
       time: {
         unit: 'day'
-      }
+      },
+      min: cutoff,
+      max: new Date()
     }
   }
 
@@ -240,7 +240,6 @@ function create_graph(stat, days = 7) {
   }
 
   let chart_data = [];
-  let cutoff = cut_off_date(days);
 
   for (const key in data.graph.dataset) {
     let dataset = {
@@ -266,7 +265,8 @@ function create_graph(stat, days = 7) {
   let chart_ = {
     type: 'line',
     options: {
-      'maintainAspectRatio': false,
+      animation: false,
+      maintainAspectRatio: false,
       scales: scales,
     }
   }
@@ -290,43 +290,37 @@ function create_graph(stat, days = 7) {
 
   const canvas = document.createElement('canvas');
   new Chart(canvas, chart_);
-  canvas.dataset.name = stat;
-  canvas.style.display = 'none';
   return canvas;
-
 }
 
 function graph_resize() {
   let size;
-  const el = document.getElementById('charts');
+
   let w = window.innerWidth;
   let h = window.innerHeight;
 
-  let golden_ratio = 1.61803;
+  let ratio = 1.25;
+
   if (h < w) {
-    size = Math.floor(w / golden_ratio);
+    size = Math.floor(w / ratio);
   } else {
-    size = Math.floor(w * golden_ratio);
+    size = Math.floor(w * ratio);
   }
-  el.style.height = size + 'px';
+
+  document.querySelectorAll('canvas').forEach(el => {
+    el.parentNode.style.height = size + 'px';
+  });
 }
 
 function update_stats(data, stat) {
   data_cache[stat] = data;
 
-  let table = create_table(stat);
-  document.getElementById('tables').appendChild(table);
-  document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
+  document.querySelector('[data-value=' + stat + ']').style.display = 'inline-block';
 
-  let graph = create_graph(stat);
-  document.getElementById('charts').appendChild(graph);
-  graph_resize();
 
   // delay showing to prevent flicker
   setTimeout(() => {
-    document.getElementById('options').style.display = 'block';
-    document.getElementById('display').style.display = 'block';
-    document.getElementById('tables').style.display = 'block';
+    document.getElementById('visualization').style.display = 'block';
     show_selected();
   }, 500);
 }
@@ -371,20 +365,12 @@ function create_table(stat, days = 7) {
     }
   });
   table.dataset.name = stat;
-  table.style.display = 'none';
   return table;
 }
 
-function option_select(event) {
-  document.querySelectorAll('span.option').forEach(
-    el => el.classList.remove('selected')
-  );
-  event.target.classList.add('selected');
-  show_selected();
-}
-
-function display_select(event) {
-  document.querySelectorAll('span.display').forEach(
+function button_select(event) {
+  let type = event.target.dataset.type;
+  document.querySelectorAll('[data-type=' + type + ']').forEach(
     el => el.classList.remove('selected')
   );
   event.target.classList.add('selected');
@@ -422,25 +408,23 @@ document.onvisibilitychange = () => {
 };
 
 function init() {
-  window.scrollTo(0, 0);
+  //window.scrollTo(0, 0);
+  move_scroll_top();
   update_status();
   request('/stats_auto', update_stats, 'auto');
   request('/stats_depth', update_stats, 'depth');
   request('/stats_volume', update_stats, 'volume');
   request('/stats_pump', update_stats, 'pump');
   request('/stats_weather', update_stats, 'weather');
-  move_scroll_top();
 }
 
 window.addEventListener('load', init);
 document.addEventListener('scroll', move_scroll_top);
-window.addEventListener('resize', graph_resize);
+//window.addEventListener('resize', graph_resize);
 
 document.getElementById('scroll_top').addEventListener('click', scroll_top);
 document.getElementById('main_info').addEventListener('click', update_status);
-document.querySelectorAll('span.option').forEach(
-  el => el.addEventListener('click', option_select)
-);
-document.querySelectorAll('span.display').forEach(
-  el => el.addEventListener('click', display_select)
+
+document.querySelectorAll('div.buttons span').forEach(
+  el => el.addEventListener('click', button_select)
 );
