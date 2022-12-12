@@ -42,8 +42,14 @@
       <span class="option" data-select="depth">Levels</span>
       <span class="option" data-select="volume">Volume</span>
     </div>
+    <div id="display">
+      <span class="display selected" data-select="graph">Graph</span>
+      <span class="display" data-select="table">Table</span>
+    </div>
 
-    <div id="tables">
+    <div id="charts"></div>
+    <div id="tables"></div>
+
     </div>
 
     <div>
@@ -52,7 +58,10 @@
     <div id="scroll_top">
       <div><img src='/static/img/up-arrow.svg' </div></div>
     </div>
-    <script src="/static/water.js"></script>
+  </div>
+  <script src="/static/water.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </body>
 
 </html>
