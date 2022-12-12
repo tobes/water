@@ -75,7 +75,7 @@ div {
   color: #000;
 }
 
-#main_info{
+#main_info {
   display: none;
 }
 
@@ -109,11 +109,12 @@ td {
 
 th span.units {
   color: #DDD;
-  display:block;
-  font-size:.8em;
-  font-weight:400;
-  padding-left:1em;
+  display: block;
+  font-size: .8em;
+  font-weight: 400;
+  padding-left: 1em;
 }
+
 tbody tr {
   border-bottom: 1px solid #ddd;
 }
@@ -135,13 +136,12 @@ td.seconds {
   text-align: right;
 }
 
-
 div.buttons {
   margin-top: 1em;
 }
 
 #visualization {
-  display:none;
+  display: none;
 }
 
 div.buttons span {
