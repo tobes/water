@@ -81,7 +81,7 @@ def stats_depths():
         },
         'axis': {
             'y': {
-                'tick_units': ' litres',
+                'tick_units': 'mm',
                 'options':{
                     'beginAtZero': True,
                 },
@@ -125,7 +125,7 @@ def stats_volumes():
         },
         'axis': {
             'y': {
-                'tick_units': ' litres',
+                'tick_units': 'L',
                 'options':{
                     'beginAtZero': True,
                 },
@@ -161,9 +161,12 @@ def stats_auto():
         },
         'axis': {
             'y': {
-                'tick_units': ' seconds',
+                'tick_units': 'seconds',
                 'options':{
                     'beginAtZero': True,
+                },
+                'ticks': {
+                    'stepSize': 10,
                 },
             },
         },
@@ -195,9 +198,12 @@ def stats_pump():
         },
         'axis': {
             'y': {
-                'tick_units': ' seconds',
+                'tick_units': 'seconds',
                 'options':{
                     'beginAtZero': True,
+                },
+                'ticks': {
+                    'stepSize': 10,
                 },
             },
         },
@@ -246,11 +252,11 @@ def stats_weather():
         },
         'axis': {
             'y': {
-                'tick_units': ' °C',
+                'tick_units': '°C',
             },
             'rain': {
                 'position': 'right',
-                'tick_units': ' mm',
+                'tick_units': 'mm',
                 'grid': {
                     'color': '#B0E0E6',
                 },
