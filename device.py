@@ -103,7 +103,7 @@ class Weather:
             print('ERROR:',e)
 
     def auto(self, save=False):
-        self.get_weather()
+        self.get_weather(save=save)
         kwargs = dict(save=True)
         util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
 
