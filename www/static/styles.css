@@ -153,6 +153,10 @@ div.buttons span {
   display: inline-block;
 }
 
+div.buttons span[data-type=stat] {
+  display: none;
+}
+
 div.buttons span.selected {
   background-color: #009879;
 }
