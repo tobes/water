@@ -149,12 +149,8 @@ div.buttons span {
   background-color: #999;
   color: #fff;
   padding: .5em 0;
-  margin: .5em auto;
+  margin: .5em;
   display: inline-block;
-}
-
-div.buttons span[data-type=stat] {
-  display: none;
 }
 
 div.buttons span.selected {

@@ -101,7 +101,7 @@ function request(url, callback, payload) {
   xhr.send();
 }
 
-function jlog(value){
+function jlog(value) {
   console.log(JSON.stringify(value, undefined, 4))
 }
 
@@ -330,17 +330,25 @@ function graph_resize() {
   });
 }
 
-function update_stats(data, stat) {
-  data_cache[stat] = data;
+function update_stats(data) {
 
-  document.querySelector('[data-value=' + stat + ']').style.display = 'inline-block';
-
-
-  // delay showing to prevent flicker
-  setTimeout(() => {
-    document.getElementById('visualization').style.display = 'block';
-    show_selected();
-  }, 500);
+  data.forEach(row => {
+    let name = row.name;
+    data_cache[name] = row.data;
+    if (document.querySelector('[data-value=' + name + ']') === null) {
+      let button = document.createElement('span');
+      button.dataset.type = 'stat';
+      button.dataset.value = name;
+      button.innerText = name;
+      if (document.querySelectorAll('#options span').length === 0) {
+        button.classList.add('selected');
+      }
+      button.addEventListener('click', button_select);
+      document.getElementById('options').appendChild(button);
+    }
+  });
+  document.getElementById('visualization').style.display = 'block';
+  show_selected();
 }
 
 function create_table(stat, days = 7) {
@@ -428,11 +436,7 @@ document.onvisibilitychange = () => {
 function init() {
   move_scroll_top();
   update_status();
-  request('/stats_auto', update_stats, 'auto');
-  request('/stats_depth', update_stats, 'depth');
-  request('/stats_volume', update_stats, 'volume');
-  request('/stats_pump', update_stats, 'pump');
-  request('/stats_weather', update_stats, 'weather');
+  request('/stats', update_stats);
 }
 
 window.addEventListener('load', init);
