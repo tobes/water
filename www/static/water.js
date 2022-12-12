@@ -426,7 +426,6 @@ document.onvisibilitychange = () => {
 };
 
 function init() {
-  //window.scrollTo(0, 0);
   move_scroll_top();
   update_status();
   request('/stats_auto', update_stats, 'auto');
