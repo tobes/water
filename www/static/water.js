@@ -93,7 +93,7 @@ function request(url, callback, payload) {
   xhr.open('GET', url, true);
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      if(this.responseText){
+      if (this.responseText) {
         callback(JSON.parse(this.responseText), payload);
       }
     }
@@ -150,9 +150,7 @@ function make_value(value, col_info) {
   }
 
   return value;
-
 }
-
 
 function show_selected_table() {
   let selected_option = document.querySelector('span.option.selected');
@@ -423,13 +421,8 @@ document.onvisibilitychange = () => {
   }
 };
 
-document.addEventListener('scroll', move_scroll_top);
-
-document.getElementById('scroll_top').addEventListener('click', scroll_top);
-document.getElementById('main').addEventListener('click', update_status);
-document.querySelectorAll('span.option').forEach(el => el.addEventListener('click', option_select));
-
 function init() {
+  window.scrollTo(0, 0);
   update_status();
   request('/stats_auto', update_stats, 'auto');
   request('/stats_depth', update_stats, 'depth');
@@ -439,4 +432,15 @@ function init() {
   move_scroll_top();
 }
 
-init();
+window.addEventListener('load', init);
+document.addEventListener('scroll', move_scroll_top);
+window.addEventListener('resize', graph_resize);
+
+document.getElementById('scroll_top').addEventListener('click', scroll_top);
+document.getElementById('main_info').addEventListener('click', update_status);
+document.querySelectorAll('span.option').forEach(
+  el => el.addEventListener('click', option_select)
+);
+document.querySelectorAll('span.display').forEach(
+  el => el.addEventListener('click', display_select)
+);
