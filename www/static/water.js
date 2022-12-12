@@ -284,12 +284,18 @@ function create_graph(stat, days = 7) {
   }
 
   // any tick callback functions
+  let fn;
   for (const key in scales) {
     if (scales[key].tick_units) {
       if (!scales[key].ticks) {
         scales[key].ticks = {};
       }
-      scales[key].ticks.callback = (value, index, ticks) => value + scales[key].tick_units;
+      if (scales[key].tick_units === 'seconds') {
+        fn = (value, index, ticks) => display_seconds(value);
+      } else {
+        fn = (value, index, ticks) => value + scales[key].tick_units;
+      }
+      scales[key].ticks.callback = fn;
     }
   }
   Object.assign(chart_.options.scales, scales);
