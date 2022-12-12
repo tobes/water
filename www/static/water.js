@@ -341,6 +341,12 @@ function create_table(stat, days = 7) {
     let th = document.createElement('th');
     th.innerText = col.title;
     th.setAttribute('class', col.type);
+    if (col.units) {
+      let units = document.createElement('span');
+      units.innerText = col.units;
+      units.classList.add('units');
+      th.append(units);
+    }
     tr.appendChild(th);
   }
   let tbody = document.createElement('tbody');
@@ -353,13 +359,7 @@ function create_table(stat, days = 7) {
         let value = make_value(row[i], cols[i]);
         let td = document.createElement('td');
         td.setAttribute('class', cols[i].type);
-        td.innerText = value + ' ';
-        if (cols[i].units) {
-          let units = document.createElement('span');
-          units.innerText = cols[i].units;
-          units.classList.add('units');
-          td.append(units);
-        }
+        td.innerText = value;
         tr.appendChild(td);
       }
     }

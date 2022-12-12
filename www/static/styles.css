@@ -107,6 +107,13 @@ td {
   text-align: left;
 }
 
+th span.units {
+  color: #DDD;
+  display:block;
+  font-size:.8em;
+  font-weight:400;
+  padding-left:1em;
+}
 tbody tr {
   border-bottom: 1px solid #ddd;
 }
