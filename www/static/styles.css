@@ -149,10 +149,13 @@ div.buttons span {
   background-color: #999;
   color: #fff;
   padding: .5em 0;
-  margin: .5em;
+  margin: .2em;
   display: inline-block;
 }
 
+canvas {
+  margin-top:1em;
+}
 div.buttons span.selected {
   background-color: #009879;
 }
