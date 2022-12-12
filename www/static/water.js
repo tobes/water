@@ -275,6 +275,11 @@ function create_graph(stat, days = 7) {
       animation: false,
       maintainAspectRatio: false,
       scales: scales,
+      plugins: {
+        tooltip: {
+          enabled: false
+        }
+      }
     }
   }
 
