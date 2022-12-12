@@ -169,6 +169,148 @@ function show_selected_table() {
       el.style.display = 'none';
     }
   });
+
+  document.querySelectorAll('canvas').forEach(el => el.style.display = 'none');
+}
+
+
+
+function show_selected() {
+  let selected_option = document.querySelector('span.option.selected');
+  let selected_display = document.querySelector('span.display.selected');
+  if (selected_option === null || selected_display === null) {
+    return;
+  }
+
+  let selected = selected_option.dataset.select;
+  let display = selected_display.dataset.select;
+  let days = 7;
+
+  if (display === 'graph') {
+    document.getElementById('charts').style.display = 'block';
+  } else {
+    document.getElementById('charts').style.display = 'none';
+  }
+
+  document.querySelectorAll('table').forEach(el => {
+    if (display === 'table' && el.dataset.name === selected) {
+      el.style.display = 'table';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+
+  document.querySelectorAll('canvas').forEach(el => {
+    if (display === 'graph' && el.dataset.name === selected) {
+      el.style.display = 'block';
+    } else {
+      el.style.display = 'none';
+    }
+  });
+}
+
+function cut_off_date(days) {
+  var d = new Date();
+  d.setDate(d.getDate() - days);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function create_graph(stat, days = 7) {
+  const data = data_cache[stat];
+
+  let scales = {
+    x: {
+      type: 'time',
+      time: {
+        unit: 'day'
+      }
+    }
+  }
+
+  for (const key in data.graph.axis) {
+    if (!scales[key]) {
+      scales[key] = {};
+    }
+    Object.assign(scales[key], data.graph.axis[key]);
+  }
+
+  let cols = data.cols;
+  let col_index = {}
+  for (let i = 0; i < cols.length; i++) {
+    col_index[cols[i].title] = i;
+  }
+
+  let chart_data = [];
+  let cutoff = cut_off_date(days);
+
+  for (const key in data.graph.dataset) {
+    let dataset = {
+      data: [],
+      label: key,
+      yAxisID: 'y'
+    };
+    Object.assign(dataset, data.graph.dataset[key] || {});
+    let index = col_index[key];
+    data.values.forEach(row => {
+      let date = new Date(row[0]);
+
+      if (date > cutoff) {
+        dataset.data.push({
+          x: date,
+          y: row[index]
+        });
+      }
+    });
+    chart_data.push(dataset)
+  }
+
+  let chart_ = {
+    type: 'line',
+    options: {
+      'maintainAspectRatio': false,
+      scales: scales,
+    }
+  }
+
+  // any tick callback functions
+  for (const key in scales) {
+    if (scales[key].tick_units) {
+      if (!scales[key].ticks) {
+        scales[key].ticks = {};
+      }
+      scales[key].ticks.callback = (value, index, ticks) => value + scales[key].tick_units;
+    }
+  }
+  Object.assign(chart_.options.scales, scales);
+
+  chart_['data'] = {
+    'datasets': chart_data
+  };
+
+  //console.log(JSON.stringify(chart_, undefined, 4))
+
+  const canvas = document.createElement('canvas');
+  new Chart(canvas, chart_);
+  canvas.dataset.name = stat;
+  canvas.style.display = 'none';
+  return canvas;
+
+}
+
+function graph_resize() {
+  let size;
+  const el = document.getElementById('charts');
+  let w = window.innerWidth;
+  let h = window.innerHeight;
+
+  let golden_ratio = 1.61803;
+  if (h < w) {
+    size = Math.floor(w / golden_ratio);
+  } else {
+    size = Math.floor(w * golden_ratio);
+  }
+  el.style.height = size + 'px';
 }
 
 function update_stats(data, stat) {
@@ -178,9 +320,14 @@ function update_stats(data, stat) {
   document.getElementById('tables').appendChild(table);
   document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
 
+  let graph = create_graph(stat);
+  document.getElementById('charts').appendChild(graph);
+  graph_resize();
+
   // delay showing to prevent flicker
   setTimeout(() => {
     document.getElementById('options').style.display = 'block';
+    document.getElementById('display').style.display = 'block';
     document.getElementById('tables').style.display = 'block';
     show_selected();
   }, 500);
@@ -232,6 +379,14 @@ function create_table(stat, days = 7) {
 
 function option_select(event) {
   document.querySelectorAll('span.option').forEach(
+    el => el.classList.remove('selected')
+  );
+  event.target.classList.add('selected');
+  show_selected();
+}
+
+function display_select(event) {
+  document.querySelectorAll('span.display').forEach(
     el => el.classList.remove('selected')
   );
   event.target.classList.add('selected');
