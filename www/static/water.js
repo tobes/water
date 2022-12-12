@@ -101,6 +101,9 @@ function request(url, callback, payload) {
   xhr.send();
 }
 
+function jlog(value){
+  console.log(JSON.stringify(value, undefined, 4))
+}
 
 function next_update() {
   var now = new Date().getTime();
@@ -144,12 +147,16 @@ function make_value(value, col_info) {
   }
 
   if (col_info.type === 'seconds') {
-    var minutes = Math.floor(value / 60);
-    var seconds = value - minutes * 60;
-    value = '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    value = display_seconds(value);
   }
 
   return value;
+}
+
+function display_seconds(value) {
+  var minutes = Math.floor(value / 60);
+  var seconds = value - minutes * 60;
+  return '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
 function show_selected_table() {
