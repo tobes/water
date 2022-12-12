@@ -2,7 +2,7 @@
 
 var update_timeout;
 let last_update = 0;
-
+let data_cache = {};
 const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 15;
 
@@ -120,6 +120,11 @@ function update_status() {
   update_timeout = setTimeout(update_status, next_update());
 }
 
+function yyyymmddToLocalDate(isoString) {
+  const [year, month, day] = isoString.split('-');
+  return new Date(year, month - 1, day);
+}
+
 function make_value(value, col_info) {
   if (col_info.type === 'date') {
     const options = {
@@ -167,21 +172,25 @@ function show_selected_table() {
 }
 
 function update_stats(data, stat) {
-  let table = create_table(data);
-  table.dataset.name = stat;
-  table.style.display = 'none';
+  data_cache[stat] = data;
+
+  let table = create_table(stat);
   document.getElementById('tables').appendChild(table);
-  show_selected_table();
   document.querySelector('[data-select=' + stat + ']').style.display = 'inline-block';
 
   // delay showing to prevent flicker
   setTimeout(() => {
     document.getElementById('options').style.display = 'block';
     document.getElementById('tables').style.display = 'block';
+    show_selected();
   }, 500);
 }
 
-function create_table(data) {
+function create_table(stat, days = 7) {
+  const data = data_cache[stat];
+
+  let cutoff = cut_off_date(days);
+
   const cols = data.cols;
   const values = data.values;
   let table = document.createElement('table');
@@ -198,29 +207,35 @@ function create_table(data) {
   let tbody = document.createElement('tbody');
   table.appendChild(tbody);
   values.forEach(row => {
-    let tr = document.createElement('tr');
-    tbody.appendChild(tr);
-    for (let i = 0; i < cols.length; i++) {
-      let value = make_value(row[i], cols[i]);
-      let td = document.createElement('td');
-      td.setAttribute('class', cols[i].type);
-      td.innerText = value;
-      if (cols[i].units) {
-        let units = document.createElement('span');
-        units.innerText = cols[i].units;
-        units.classList.add('units');
-        td.append(units);
+    if (yyyymmddToLocalDate(row[0]) > cutoff) {
+      let tr = document.createElement('tr');
+      tbody.appendChild(tr);
+      for (let i = 0; i < cols.length; i++) {
+        let value = make_value(row[i], cols[i]);
+        let td = document.createElement('td');
+        td.setAttribute('class', cols[i].type);
+        td.innerText = value + ' ';
+        if (cols[i].units) {
+          let units = document.createElement('span');
+          units.innerText = cols[i].units;
+          units.classList.add('units');
+          td.append(units);
+        }
+        tr.appendChild(td);
       }
-      tr.appendChild(td);
     }
   });
+  table.dataset.name = stat;
+  table.style.display = 'none';
   return table;
 }
 
 function option_select(event) {
-  document.querySelectorAll('span.option').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('span.option').forEach(
+    el => el.classList.remove('selected')
+  );
   event.target.classList.add('selected');
-  show_selected_table();
+  show_selected();
 }
 
 function move_scroll_top() {
