@@ -300,11 +300,11 @@ function create_graph(stat, days = 7) {
   }
   Object.assign(chart_.options.scales, scales);
 
+
   chart_['data'] = {
     'datasets': chart_data
   };
 
-  //console.log(JSON.stringify(chart_, undefined, 4))
 
   const canvas = document.createElement('canvas');
   new Chart(canvas, chart_);
