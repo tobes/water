@@ -364,6 +364,7 @@ function graph_resize() {
   } else {
     size = Math.floor(w * ratio);
   }
+  size = Math.min(size, h)
 
   document.querySelectorAll('canvas').forEach(el => {
     el.parentNode.style.height = size + 'px';
