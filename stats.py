@@ -33,12 +33,14 @@ def stats_depths():
     graph = {
         'dataset': {
             'min': {
+                'label': 'Minimum Depth',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',
                 'order': 0,
             },
             'max': {
+                'label': 'Maximum Depth',
                 'type': 'bar',
                 'backgroundColor': '#999999',
                 'borderColor': '#999999',
@@ -76,12 +78,14 @@ def stats_volumes():
     graph = {
         'dataset': {
             'min': {
+                'label': 'Minimum Volume',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',
                 'order': 0,
             },
             'max': {
+                'label': 'Maximum Volume',
                 'type': 'bar',
                 'backgroundColor': '#999999',
                 'borderColor': '#999999',
@@ -118,6 +122,7 @@ def stats_auto():
     graph = {
         'dataset': {
             'duration': {
+                'label': 'Duration',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',
@@ -154,6 +159,7 @@ def stats_pump():
     graph = {
         'dataset': {
             'duration': {
+                'label': 'Duration',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',

@@ -318,6 +318,13 @@ function create_graph(graph, cols, values, cutoff) {
       plugins: {
         tooltip: {
           enabled: false
+        },
+        legend: {
+          labels: {
+            font: {
+              size: 20
+            }
+          }
         }
       }
     }
