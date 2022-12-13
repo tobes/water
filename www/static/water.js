@@ -213,7 +213,6 @@ function show_selected() {
 
   if (data) {
     data.values.forEach(row => {
-      console.log(row[0])
       if (yyyymmddToLocalDate(row[0]) > cutoff) {
         values.push(row);
       }
@@ -267,14 +266,13 @@ function cut_off_date(days) {
 }
 
 function create_graph(graph, cols, values, cutoff) {
-
   let scales = {
     x: {
       type: 'time',
       time: {
         unit: 'day'
       },
-      min: new Date().setDate(cutoff - 1),
+      min: new Date(cutoff - 1),
       max: new Date().setHours(0, 0, 0, 0)
     }
   }
