@@ -6,7 +6,7 @@ let data_cache = {};
 const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 15;
 
-function update(data) {
+function update(data, automated) {
 
   var w = data.weather.state;
   var temp = w.main.temp;
@@ -60,6 +60,10 @@ function update(data) {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('main_info').style.display = 'block';
+
+  if (automated === true) {
+    request('/stats', update_stats);
+  }
 }
 
 function show_json(data) {
@@ -126,14 +130,15 @@ function next_update() {
 
 
 function update_status(automated) {
+  if (automated !== true){
+    document.getElementById('accuracy').innerText = 'updating';
+    document.getElementById('accuracy').className = 'updating';
+  }
   if (update_timeout) {
     clearTimeout(update_timeout);
   }
-  request('/status', update);
-  if (automated === true) {
-    request('/stats', update_stats);
-    last_update = new Date().getTime();
-  }
+  request('/status', update, automated);
+  last_update = new Date().getTime();
   update_timeout = setTimeout(update_status, next_update(), true);
 }
 

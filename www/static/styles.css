@@ -75,6 +75,11 @@ div {
   color: #DDD;
 }
 
+#accuracy.updating {
+  background-color: #DDD;
+  color: #000;
+}
+
 #main_info {
   display: none;
 }
