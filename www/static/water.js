@@ -360,6 +360,17 @@ function update_stats(data) {
     }
   });
   document.getElementById('visualization').style.display = 'block';
+  const options_date = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  };
+
+  let message_time = new Date().toLocaleString(LOCALE, options_date);
+  document.getElementById('data_update_time').innerText = 'Updated: ' + message_time;
   show_selected();
 }
 
