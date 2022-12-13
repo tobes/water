@@ -79,6 +79,16 @@ div {
   display: none;
 }
 
+#data_error {
+  margin: 3em auto;
+  font-size: 1.5em;
+  color: #009879;
+}
+
+#data_update_time {
+  color: #666;
+}
+
 .units {
   color: #666;
   padding-left: .25em;
@@ -154,8 +164,9 @@ div.buttons span {
 }
 
 canvas {
-  margin-top:1em;
+  margin-top: 1em;
 }
+
 div.buttons span.selected {
   background-color: #009879;
 }

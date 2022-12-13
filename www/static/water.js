@@ -205,18 +205,55 @@ function show_selected() {
   let display = selected_display.dataset.value;
   let period = selected_period.dataset.value;
 
-  let visualization;
-  if (display === 'graph') {
-    visualization = document.createElement('div');
-    visualization.appendChild(create_graph(stat, period));
+  let cutoff = cut_off_date(period);
+
+  const data = data_cache[stat];
+
+  let values = [];
+
+  if (data) {
+    data.values.forEach(row => {
+      console.log(row[0])
+      if (yyyymmddToLocalDate(row[0]) > cutoff) {
+        values.push(row);
+      }
+    });
+    if (values.length === 0) {
+      display = 'no data';
+    }
   } else {
-    visualization = create_table(stat, period);
+    display = 'unknown';
   }
+
+  let el;
+  switch (display) {
+    case 'graph':
+      el = document.createElement('div');
+      el.appendChild(create_graph(data.graph, data.cols, values, cutoff));
+      break;
+    case 'table':
+      el = create_table(data.cols, values);
+      break;
+    case 'no data':
+      el = document.createElement('div');
+      el.id = 'data_error';
+      el.innerText = 'No data available for this date range.';
+      break;
+    case 'unknown':
+      el = document.createElement('div');
+      el.id = 'data_error';
+      el.innerText = 'Sorry not available';
+      break;
+  }
+  update_stat_display(el);
+}
+
+function update_stat_display(content) {
   let data_div = document.getElementById('data')
-  data_div.appendChild(visualization);
+  data_div.appendChild(content);
   graph_resize();
   let child_nodes = data_div.childNodes.forEach(el => {
-    if (el !== visualization) {
+    if (el !== content) {
       el.remove();
     }
   });
@@ -229,10 +266,7 @@ function cut_off_date(days) {
   return d;
 }
 
-function create_graph(stat, days = 7) {
-  const data = data_cache[stat];
-
-  let cutoff = cut_off_date(days);
+function create_graph(graph, cols, values, cutoff) {
 
   let scales = {
     x: {
@@ -245,14 +279,13 @@ function create_graph(stat, days = 7) {
     }
   }
 
-  for (const key in data.graph.axis) {
+  for (const key in graph.axis) {
     if (!scales[key]) {
       scales[key] = {};
     }
-    Object.assign(scales[key], data.graph.axis[key]);
+    Object.assign(scales[key], graph.axis[key]);
   }
 
-  let cols = data.cols;
   let col_index = {}
   for (let i = 0; i < cols.length; i++) {
     col_index[cols[i].title] = i;
@@ -260,23 +293,20 @@ function create_graph(stat, days = 7) {
 
   let chart_data = [];
 
-  for (const key in data.graph.dataset) {
+  for (const key in graph.dataset) {
     let dataset = {
       data: [],
       label: key,
       yAxisID: 'y'
     };
-    Object.assign(dataset, data.graph.dataset[key] || {});
+    Object.assign(dataset, graph.dataset[key] || {});
     let index = col_index[key];
-    data.values.forEach(row => {
+    values.forEach(row => {
       let date = new Date(row[0]);
-
-      if (date > cutoff) {
-        dataset.data.push({
-          x: date,
-          y: row[index]
-        });
-      }
+      dataset.data.push({
+        x: date,
+        y: row[index]
+      });
     });
     chart_data.push(dataset)
   }
@@ -374,13 +404,8 @@ function update_stats(data) {
   show_selected();
 }
 
-function create_table(stat, days = 7) {
-  const data = data_cache[stat];
+function create_table(cols, values) {
 
-  let cutoff = cut_off_date(days);
-
-  const cols = data.cols;
-  const values = data.values;
   let table = document.createElement('table');
   let thead = document.createElement('thead');
   table.appendChild(thead);
@@ -401,19 +426,17 @@ function create_table(stat, days = 7) {
   let tbody = document.createElement('tbody');
   table.appendChild(tbody);
   values.forEach(row => {
-    if (yyyymmddToLocalDate(row[0]) > cutoff) {
-      let tr = document.createElement('tr');
-      tbody.appendChild(tr);
-      for (let i = 0; i < cols.length; i++) {
-        let value = make_value(row[i], cols[i]);
-        let td = document.createElement('td');
-        td.setAttribute('class', cols[i].type);
-        td.innerText = value;
-        tr.appendChild(td);
-      }
+    let tr = document.createElement('tr');
+    tbody.appendChild(tr);
+    for (let i = 0; i < cols.length; i++) {
+      let value = make_value(row[i], cols[i]);
+      let td = document.createElement('td');
+      td.setAttribute('class', cols[i].type);
+      td.innerText = value;
+      tr.appendChild(td);
     }
   });
-  table.dataset.name = stat;
+  //table.dataset.name = stat;
   return table;
 }
 
