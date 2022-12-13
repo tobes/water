@@ -92,18 +92,25 @@ def update_levels_for_date(date, sensor):
         from device import Butt
         butt = Butt()
 
-    sql_acurate = '''
+    sql_max_accurracy = '''
+        SELECT min(accuracy)
+        FROM levels
+        WHERE date(datestamp) = ?
+        AND sensor = ?
+    '''
+
+    sql_accurate = '''
         SELECT max(level2) as max, min(level2) as min,
         (SELECT (level2) FROM levels WHERE
           date(datestamp) = date(l.datestamp)
-          AND accuracy = 0
+          AND accuracy = ?
           ORDER BY datestamp DESC
             LIMIT 1
         ) AS last
         FROM levels l
-        WHERE accuracy = 0
-        AND date(datestamp)=?
-        AND sensor=?
+        WHERE accuracy = ?
+        AND date(datestamp) = ?
+        AND sensor = ?
     '''
 
     def level_record(row, date=None, sensor=None, accuracy=None):
@@ -122,13 +129,15 @@ def update_levels_for_date(date, sensor):
             accuracy=accuracy,
         )
 
-    with run_sql(sql_acurate, (date, sensor)) as result:
+    with run_sql(sql_max_accurracy, (date, sensor)) as result:
         for row in result:
-            if row[0] is None:
-                break
+            max_accuracy = row[0]
+
+    with run_sql(sql_accurate, (max_accuracy, max_accuracy, date, sensor)) as result:
+        for row in result:
             record = level_record(row, date=date, sensor=sensor, accuracy=0)
             save_data('level_summary', **record)
-            print('update levels for', date)
+            print('update levels for', date, 'accuracy', max_accuracy)
 
 
 def update_levels():
