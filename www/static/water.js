@@ -457,7 +457,7 @@ document.onvisibilitychange = () => {
 };
 
 function init() {
-  move_scroll_top();
+  scroll_top();
   update_status(true);
 }
 
