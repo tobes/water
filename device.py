@@ -247,7 +247,7 @@ class Meter:
         self.distance = 0
         self.distance2 = 0
         self.accuracy = 0
-        self.done = False
+        self.done = True
         self.update_time = None
         self.last_update_time = None
         self.ticks = []
@@ -306,7 +306,7 @@ class Meter:
             self.thread = None
         self.ticks = []
         self.save = save
-        if self.done:
+        if save or self.done:
             self.done = False
             self.last_update_time = time.time()
             p.gpio_trigger(self.gpio_trigger, 10, 1)
