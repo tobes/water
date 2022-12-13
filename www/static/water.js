@@ -126,13 +126,16 @@ function next_update() {
 }
 
 
-function update_status() {
+function update_status(automated) {
   if (update_timeout) {
     clearTimeout(update_timeout);
   }
   request('/status', update);
-  last_update = new Date().getTime();
-  update_timeout = setTimeout(update_status, next_update());
+  if (automated) {
+    request('/stats', update_stats);
+    last_update = new Date().getTime();
+  }
+  update_timeout = setTimeout(update_status, next_update(), true);
 }
 
 function yyyymmddToLocalDate(isoString) {
@@ -441,14 +444,13 @@ document.onvisibilitychange = () => {
       clearTimeout(update_timeout);
     }
   } else {
-    update_timeout = setTimeout(update_status, next_update());
+    update_timeout = setTimeout(update_status, next_update(), true);
   }
 };
 
 function init() {
   move_scroll_top();
-  update_status();
-  request('/stats', update_stats);
+  update_status(true);
 }
 
 window.addEventListener('load', init);
