@@ -247,6 +247,7 @@ class Meter:
         self.distance = 0
         self.distance2 = 0
         self.accuracy = 0
+        self.done = False
         self.update_time = None
         self.last_update_time = None
         self.ticks = []
@@ -275,6 +276,7 @@ class Meter:
                     self.distance2 = int(statistics.geometric_mean(self.ticks) * 0.1715)
                     self.accuracy = round(statistics.pstdev(self.ticks), 2)
                     self.update_time = util.timestamp()
+                    self.done = True
                     if self.save:
                         db.save_data(
                             'levels',
@@ -297,6 +299,7 @@ class Meter:
         self.get_distance()
 
     def get_distance(self, save=False):
+        self.done = False
         if self.thread:
             self.thread.cancel()
             self.thread = None
@@ -304,6 +307,8 @@ class Meter:
         self.save = save
         self.last_update_time = time.time()
         p.gpio_trigger(self.gpio_trigger, 10, 1)
+        while (self.done is false):
+            time.sleep(0.1)
 
     def status(self):
         if (self.last_update_time is None or
