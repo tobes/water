@@ -124,6 +124,8 @@ def update_levels_for_date(date, sensor):
 
     with run_sql(sql_acurate, (date, sensor)) as result:
         for row in result:
+            if row[0] is None:
+                break
             record = level_record(row, date=date, sensor=sensor, accuracy=0)
             save_data('level_summary', **record)
             print('update levels for', date)
