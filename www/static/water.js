@@ -116,7 +116,7 @@ function next_update() {
   }
   let delay = UPDATE_INTERVAL - now % UPDATE_INTERVAL;
   delay += random_int(UPDATE_INTERVAL * 0.01)
-  if (delay < 5000){
+  if (delay < 5000) {
     delay = 5000
   }
   return delay;
