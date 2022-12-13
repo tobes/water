@@ -108,12 +108,21 @@ function jlog(value) {
   console.log(JSON.stringify(value, undefined, 4))
 }
 
+function random_int(max) {
+  return Math.floor(Math.random() * (Math.floor(max) + 1));
+}
+
 function next_update() {
   var now = new Date().getTime();
   if (now - last_update >= UPDATE_INTERVAL) {
     return 0;
   }
-  return UPDATE_INTERVAL - now % UPDATE_INTERVAL;
+  let delay = UPDATE_INTERVAL - now % UPDATE_INTERVAL;
+  delay += random_int(UPDATE_INTERVAL * 0.01)
+  if (delay < 5000){
+    delay = 5000
+  }
+  return delay;
 }
 
 
