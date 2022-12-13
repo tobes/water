@@ -110,7 +110,7 @@ class Weather:
     def status(self):
         # update weather if not done during last WEATHER_CHECK_INTERVAL seconds
         if (self.last_update_time is None or
-            time.time() - self.last_update_time < config.WEATHER_CHECK_INTERVAL):
+            time.time() - self.last_update_time > config.WEATHER_CHECK_INTERVAL):
             self.get_weather()
         out = {
             'state': self.state,
@@ -307,7 +307,7 @@ class Meter:
 
     def status(self):
         if (self.last_update_time is None or
-            time.time() - self.last_update_time < config.METER_CHECK_INTERVAL):
+            time.time() - self.last_update_time > config.METER_CHECK_INTERVAL):
             self.get_distance()
         butt_data = self.butt.calculate_stats(self.distance2)
         return {
