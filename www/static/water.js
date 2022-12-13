@@ -274,8 +274,8 @@ function create_graph(graph, cols, values, cutoff) {
       time: {
         unit: 'day'
       },
-      min: cutoff,
-      max: new Date()
+      min: new Date().setDate(cutoff - 1),
+      max: new Date().setHours(0, 0, 0, 0)
     }
   }
 
