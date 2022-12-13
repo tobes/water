@@ -245,6 +245,7 @@ class Meter:
         self.pulse_start = 0
         self.pulse_end = 0
         self.distance = 0
+        self.distance2 = 0
         self.accuracy = 0
         self.update_time = None
         self.ticks = []
