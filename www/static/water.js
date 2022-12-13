@@ -315,6 +315,14 @@ function create_graph(graph, cols, values, cutoff) {
       animation: false,
       maintainAspectRatio: false,
       scales: scales,
+      elements: {
+        point: {
+          radius: 0
+        },
+        line: {
+          borderWidth: 2
+        }
+      },
       plugins: {
         tooltip: {
           enabled: false
@@ -322,7 +330,7 @@ function create_graph(graph, cols, values, cutoff) {
         legend: {
           labels: {
             font: {
-              size: 20
+              size: 15
             }
           }
         }

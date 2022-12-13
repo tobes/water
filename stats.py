@@ -33,14 +33,14 @@ def stats_depths():
     graph = {
         'dataset': {
             'min': {
-                'label': 'Minimum Depth',
+                'label': 'Min Depth',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',
                 'order': 0,
             },
             'max': {
-                'label': 'Maximum Depth',
+                'label': 'Max Depth',
                 'type': 'bar',
                 'backgroundColor': '#999999',
                 'borderColor': '#999999',
@@ -78,14 +78,14 @@ def stats_volumes():
     graph = {
         'dataset': {
             'min': {
-                'label': 'Minimum Volume',
+                'label': 'Min Volume',
                 'type': 'bar',
                 'backgroundColor': '#009879',
                 'borderColor': '#009879',
                 'order': 0,
             },
             'max': {
-                'label': 'Maximum Volume',
+                'label': 'Max Volume',
                 'type': 'bar',
                 'backgroundColor': '#999999',
                 'borderColor': '#999999',
@@ -197,14 +197,14 @@ def stats_weather():
     graph = {
         'dataset': {
             'min': {
-                'label': 'Minimum Temperature',
+                'label': 'Min Temp',
                 'tension': 0.1,
                 'fill': False,
                 'backgroundColor': '#4169E1',
                 'borderColor': '#4169E1',
             },
             'max': {
-                'label': 'Maximum Temperature',
+                'label': 'Max Temp',
                 'tension': 0.1,
                 'fill': False,
                 'backgroundColor': '#DC143C',
