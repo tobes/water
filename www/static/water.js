@@ -129,7 +129,7 @@ function next_update() {
 }
 
 
-function update_status(automated) {
+function update_status(automated, first) {
   if (automated !== true){
     document.getElementById('accuracy').innerText = 'updating';
     document.getElementById('accuracy').className = 'updating';
@@ -137,7 +137,11 @@ function update_status(automated) {
   if (update_timeout) {
     clearTimeout(update_timeout);
   }
-  request('/status', update, automated);
+  let url = '/status';
+  if (first){
+    url += '?fast';
+  }
+  request(url, update, automated);
   last_update = new Date().getTime();
   update_timeout = setTimeout(update_status, next_update(), true);
 }
@@ -502,7 +506,7 @@ document.onvisibilitychange = () => {
 
 function init() {
   scroll_top();
-  update_status(true);
+  update_status(true, true);
 }
 
 window.addEventListener('load', init);
