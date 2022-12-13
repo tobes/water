@@ -248,6 +248,7 @@ class Meter:
         self.distance2 = 0
         self.accuracy = 0
         self.update_time = None
+        self.last_update_time = None
         self.ticks = []
         self.save=False
         self.thread = None
@@ -301,10 +302,13 @@ class Meter:
             self.thread = None
         self.ticks = []
         self.save = save
+        self.last_update_time = time.time()
         p.gpio_trigger(self.gpio_trigger, 10, 1)
 
     def status(self):
-        self.get_distance()
+        if (self.last_update_time is None or
+            time.time() - self.last_update_time < config.METER_CHECK_INTERVAL):
+            self.get_distance()
         butt_data = self.butt.calculate_stats(self.distance2)
         return {
             'depth': butt_data['depth'],
