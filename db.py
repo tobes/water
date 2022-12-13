@@ -158,6 +158,7 @@ def update_levels():
             updates.append([date, sensor])
 
     for update in updates:
+        print('update levels for', updates[0])
         update_levels_for_date(*update)
 
 

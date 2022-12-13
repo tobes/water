@@ -259,6 +259,8 @@ class Meter:
         p.set_mode(gpio_echo, pigpio.INPUT)
         p.set_pull_up_down(gpio_echo, pigpio.PUD_DOWN)
 
+        db.update_recent_levels()
+
         def cbf_pulse_length(gpio, level, tick):
             if level:
                 self.pulse_start = tick
