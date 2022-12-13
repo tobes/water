@@ -128,7 +128,7 @@ function update_status(automated) {
     clearTimeout(update_timeout);
   }
   request('/status', update);
-  if (automated) {
+  if (automated === true) {
     request('/stats', update_stats);
     last_update = new Date().getTime();
   }
