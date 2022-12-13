@@ -2,7 +2,6 @@ import json
 import os
 import statistics
 import time
-import threading
 
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
@@ -151,8 +150,7 @@ class Relay:
         self.state = 'ON'
         self.update_time = util.timestamp()
         self.off_time = time.time() + seconds
-        self.thread = threading.Timer(seconds, self.pump_off)
-        self.thread.start()
+        util.thread_runner(self.pump_off, seconds=seconds)
         self.pump_seconds=seconds
 
         db.save_data(
@@ -284,8 +282,7 @@ class Meter:
                         seconds = (config.LEVEL_INTERVAL - (time.time() % config.LEVEL_INTERVAL))
                         if seconds < 1:
                             seconds += config.LEVEL_INTERVAL
-                        self.thread = threading.Timer(seconds, self.get_distance, kwargs=dict(save=True))
-                        self.thread.start()
+                        util.thread_runner(self.get_distance, seconds=seconds, kwargs={'save': True})
 
         p.callback(gpio_echo, pigpio.EITHER_EDGE, cbf_pulse_length)
 
