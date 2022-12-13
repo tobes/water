@@ -20,9 +20,10 @@ devices['weather'] = device.Weather()
 
 
 def status(data):
+    fast = data.get('fast')
     out = {}
     for name, device in devices.items():
-        out[name] = device.status()
+        out[name] = device.status(fast=fast)
     return out
 
 
@@ -69,7 +70,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 command = COMMANDS[data.get('command', 'status')]
                 print(data)
                 try:
-                    out = command(data.get('data', {}))
+                    out = command(data)
                 except Exception as e:
                     type, value, exc_traceback = sys.exc_info()
                     print('@@', value)

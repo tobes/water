@@ -1,7 +1,7 @@
 import os.path
 import subprocess
 
-from flask import Flask, make_response, render_template
+from flask import Flask, make_response, render_template, request
 
 import db
 from weather import get_summary
@@ -27,7 +27,10 @@ def serve_static(path):
 
 @app.route("/status")
 def status():
-    data = subprocess.run(['python3', 'client.py', 'status'], stdout=subprocess.PIPE).stdout
+    status_cmd = ['python3', 'client.py', 'status']
+    if 'fast' in request.args:
+        status_cmd.append('--fast')
+    data = subprocess.run(status_cmd, stdout=subprocess.PIPE).stdout
     response = make_response(data)
     response.mimetype = 'application/json'
     response.headers['Access-Control-Allow-Origin'] = '*'

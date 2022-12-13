@@ -107,7 +107,7 @@ class Weather:
         util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
         self.get_weather(save=save)
 
-    def status(self):
+    def status(self, **kw):
         # update weather if not done during last WEATHER_CHECK_INTERVAL seconds
         if (self.last_update_time is None or
             time.time() - self.last_update_time > config.WEATHER_CHECK_INTERVAL):
@@ -165,7 +165,7 @@ class Relay:
             duration=seconds,
         )
 
-    def status(self):
+    def status(self, **kw):
         out = {
             'state': self.state,
             'update_time': self.update_time,
@@ -301,6 +301,10 @@ class Meter:
         self.get_distance()
 
     def get_distance(self, save=False):
+        time_since_update = time.time() - (self.last_update_time or 0)
+        if save is False and time_since_update  < config.METER_CHECK_INTERVAL:
+            return
+
         if self.thread:
             self.thread.cancel()
             self.thread = None
@@ -313,9 +317,9 @@ class Meter:
             while (self.done is False):
                 time.sleep(0.1)
 
-    def status(self):
-        if (self.last_update_time is None or
-            time.time() - self.last_update_time > config.METER_CHECK_INTERVAL):
+    def status(self, **kw):
+        fast = kw.get('fast')
+        if fast is not True:
             self.get_distance()
         butt_data = self.butt.calculate_stats(self.distance2)
         return {

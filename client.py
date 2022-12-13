@@ -17,7 +17,7 @@ def cmd_pump(args):
 
 
 def cmd_status(args):
-    return {'command': 'status'}
+    return {'command': 'status', 'fast': args.fast}
 
 
 def message(packet):
@@ -34,6 +34,7 @@ if __name__ == '__main__':
     subparser = parser.add_subparsers(dest='cmd')
 
     sub_status = subparser.add_parser('status')
+    sub_status.add_argument('--fast', action='store_true')
 
     sub_pump = subparser.add_parser('pump')
     sub_pump.add_argument('seconds', nargs='?', default=15)
