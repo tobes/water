@@ -7,9 +7,6 @@ const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 15;
 
 function update(data) {
-  if (data.length === 0){
-    return;
-  }
 
   var w = data.weather.state;
   var temp = w.main.temp;
