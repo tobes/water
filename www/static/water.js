@@ -48,7 +48,7 @@ function update(data, automated) {
 
   let message_time = new Date(msg_time).toLocaleString(LOCALE, options_time);
 
-  document.getElementById('icon').src = '/static/img/' + icon + '.png';
+  document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
   document.getElementById('temp').innerText = temp;
   document.getElementById('depth').innerText = depth;
   document.getElementById('volume').innerText = volume;

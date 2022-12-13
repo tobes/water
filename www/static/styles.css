@@ -11,6 +11,11 @@ div {
   text-align: center;
 }
 
+#weather_icon {
+  height:128px;
+  width:128px;
+}
+
 /* json */
 
 #message_raw {
