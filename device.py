@@ -68,11 +68,12 @@ class Weather:
     def __init__(self):
         self.thread = None
         self.update_time = None
+        self.last_update_time = None
         self.state = None
-        self.day_summary = {}
+        self.state_time = None
         self.get_weather()
 
-        self.day_summary = db.update_recent_weather()[-1]
+        db.update_recent_weather()
 
     def get_weather(self, save=False):
         query_data = {
@@ -82,6 +83,7 @@ class Weather:
             'units': 'metric',
         }
 
+        self.last_update_time = time.time()
         query_string = urlencode(query_data)
         try:
             content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
@@ -95,21 +97,23 @@ class Weather:
                     datestamp=util.timestamp()
                 )
                 # update summary table
-                updates = db.update_recent_weather()
-                self.day_summary = updates[-1]
+                db.update_recent_weather()
             #print(content)
         except Exception as e:
             print('ERROR:',e)
 
     def auto(self, save=False):
+        kwargs = dict(save=True)
         util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
         self.get_weather(save=save)
-        kwargs = dict(save=True)
 
     def status(self):
+        # update weather if not done during last WEATHER_CHECK_INTERVAL seconds
+        if (self.last_update_time is None or
+            time.time() - self.last_update_time < config.WEATHER_CHECK_INTERVAL):
+            self.get_weather()
         out = {
             'state': self.state,
-            'day_summary': self.day_summary,
             'update_time': self.update_time,
         }
         return out

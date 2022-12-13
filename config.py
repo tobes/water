@@ -12,6 +12,7 @@ METER_REPEAT_DELAY = 0.1
 LAT = 51.578066
 LON = -0.100738
 WEATHER_INTERVAL =  60 * 60
+WEATHER_CHECK_INTERVAL =  60 * 5
 
 WEATHER_API_KEY = Path('weather_api_key.secret').read_text().strip()
 WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather?'
