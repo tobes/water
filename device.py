@@ -301,16 +301,17 @@ class Meter:
         self.get_distance()
 
     def get_distance(self, save=False):
-        self.done = False
         if self.thread:
             self.thread.cancel()
             self.thread = None
         self.ticks = []
         self.save = save
-        self.last_update_time = time.time()
-        p.gpio_trigger(self.gpio_trigger, 10, 1)
-        while (self.done is false):
-            time.sleep(0.1)
+        if self.done:
+            self.done = False
+            self.last_update_time = time.time()
+            p.gpio_trigger(self.gpio_trigger, 10, 1)
+            while (self.done is False):
+                time.sleep(0.1)
 
     def status(self):
         if (self.last_update_time is None or
