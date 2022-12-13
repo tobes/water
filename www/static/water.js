@@ -179,7 +179,7 @@ function display_seconds(value) {
 }
 
 function show_selected_table() {
-  let selected_option = document.querySelector('span.option.selected');
+  let selected_option = document.querySelector('li.option.selected');
   if (selected_option === null) {
     return;
   }
@@ -399,11 +399,11 @@ function update_stats(data) {
     let name = row.name;
     data_cache[name] = row.data;
     if (document.querySelector('[data-value=' + name + ']') === null) {
-      let button = document.createElement('span');
+      let button = document.createElement('li');
       button.dataset.type = 'stat';
       button.dataset.value = name;
       button.innerText = name;
-      if (document.querySelectorAll('#options span').length === 0) {
+      if (document.querySelectorAll('#options li').length === 0) {
         button.classList.add('selected');
       }
       button.addEventListener('click', button_select);
@@ -512,6 +512,6 @@ document.addEventListener('scroll', move_scroll_top);
 document.getElementById('scroll_top').addEventListener('click', scroll_top);
 document.getElementById('main_info').addEventListener('click', update_status);
 
-document.querySelectorAll('div.buttons span').forEach(
+document.querySelectorAll('li').forEach(
   el => el.addEventListener('click', button_select)
 );

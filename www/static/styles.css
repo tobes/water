@@ -171,7 +171,13 @@ div.buttons {
   display: none;
 }
 
-div.buttons span {
+menu{
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+li {
   width: 6em;
   background-color: #999;
   color: #fff;
@@ -181,13 +187,18 @@ div.buttons span {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
 
+li:hover{
+  background-color: #888;
+}
+
+li.selected {
+  background-color: #009879;
+}
+
 canvas {
   margin-top: 1em;
 }
 
-div.buttons span.selected {
-  background-color: #009879;
-}
 
 #scroll_top div {
   position: relative;
