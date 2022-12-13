@@ -278,6 +278,7 @@ class Meter:
                             level2=self.distance2,
                             accuracy=self.accuracy,
                         )
+                        db.update_recent_levels()
 
                     if self.thread == None:
                         seconds = (config.LEVEL_INTERVAL - (time.time() % config.LEVEL_INTERVAL))
