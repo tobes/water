@@ -57,6 +57,8 @@ function update(data) {
   document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
   document.getElementById('message_time').innerText = message_time;
   document.getElementById('message_date').innerText = message_date;
+
+  document.getElementById('loading').style.display = 'none';
   document.getElementById('main_info').style.display = 'block';
 }
 

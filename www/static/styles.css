@@ -85,6 +85,12 @@ div {
   color: #009879;
 }
 
+#loading {
+  color: #009879;
+  margin-top: 3em;
+  font-size: 1.5em;
+}
+
 #data_update_time {
   color: #666;
   font-size: .8em;
