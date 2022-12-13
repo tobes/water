@@ -102,9 +102,9 @@ class Weather:
             print('ERROR:',e)
 
     def auto(self, save=False):
+        util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
         self.get_weather(save=save)
         kwargs = dict(save=True)
-        util.thread_runner(self.auto, interval=config.WEATHER_INTERVAL, kwargs=kwargs)
 
     def status(self):
         out = {
@@ -175,6 +175,19 @@ class Relay:
         return out
 
     def auto(self, action=False):
+        # set auto to rerun
+        now = datetime.now()
+        wanted = now.replace(
+                hour=config.AUTO_HOUR,
+                minute=config.AUTO_MINUTE,
+                second=0,
+                microsecond=0
+        )
+        if wanted < now:
+            wanted += timedelta(days=1)
+        delay = (wanted - now).total_seconds()
+        util.thread_runner(self.auto, seconds=delay, kwargs={'action': True})
+
         w = weather.get_last_period()
         # if we have no weather info don't process
         if  action and w['temp_max'] is not None:
@@ -218,17 +231,6 @@ class Relay:
                 datestamp=util.timestamp()
             )
 
-        now = datetime.now()
-        wanted = now.replace(
-                hour=config.AUTO_HOUR,
-                minute=config.AUTO_MINUTE,
-                second=0,
-                microsecond=0
-        )
-        if wanted < now:
-            wanted += timedelta(days=1)
-        delay = (wanted - now).total_seconds()
-        util.thread_runner(self.auto, seconds=delay, kwargs={'action': True})
 
 class Meter:
 
