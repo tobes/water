@@ -130,7 +130,7 @@ function next_update() {
 
 
 function update_status(automated, first) {
-  if (automated !== true){
+  if (automated !== true) {
     document.getElementById('accuracy').innerText = 'updating';
     document.getElementById('accuracy').className = 'updating';
   }
@@ -138,7 +138,7 @@ function update_status(automated, first) {
     clearTimeout(update_timeout);
   }
   let url = '/status';
-  if (first){
+  if (first) {
     url += '?fast';
   }
   request(url, update, automated);
