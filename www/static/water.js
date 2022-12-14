@@ -277,14 +277,21 @@ function cut_off_date(days) {
 }
 
 function create_graph(graph, cols, values, cutoff) {
+  let min_date = new Date(cutoff)
+  min_date.setHours(0, 0, 0, 0);
+  min_date.setDate(min_date.getDate() + 1);
+
+  let max_date = new Date()
+  max_date.setHours(0, 0, 0, 0)
+
   let scales = {
     x: {
       type: 'time',
       time: {
         unit: 'day'
       },
-      min: new Date(cutoff - 1),
-      max: new Date().setHours(0, 0, 0, 0)
+      min: min_date,
+      max: max_date
     }
   }
 
