@@ -20,9 +20,13 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory(static_path, path)
+@app.route('/sw.js')
+def service_worker():
+    path = os.path.join(static_path, 'sw.js')
+    response = make_response(open(path))
+    response.headers['Service-Worker-Allowed'] = 'https://tollington.duckdns.org/'
+    response.headers['Content-Type'] = 'application/javascript; charset=UTF-8'
+    return response
 
 
 @app.route("/status")
