@@ -182,31 +182,3 @@ canvas {
   width: 1.5em;
   color: #fff;
 }
-
-/* json */
-
-#message_raw {
-  text-align: left;
-  max-width: 200px;
-  margin: auto;
-}
-
-.j_string {
-  color: green;
-}
-
-.j_number {
-  color: darkorange;
-}
-
-.j_boolean {
-  color: blue;
-}
-
-.j_null {
-  color: magenta;
-}
-
-.j_key {
-  color: red;
-}
