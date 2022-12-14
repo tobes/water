@@ -501,3 +501,8 @@ document.getElementById('main_info').addEventListener('click', update_status);
 document.querySelectorAll('li').forEach(
   el => el.addEventListener('click', button_select)
 );
+
+if ('serviceWorker' in navigator) {
+  alert('SW');
+  navigator.serviceWorker.register('static/sw.js');
+}
