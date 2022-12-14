@@ -11,37 +11,14 @@ div {
   text-align: center;
 }
 
+#visualization,
+#main_info {
+  display: none;
+}
+
 #weather_icon {
-  height:128px;
-  width:128px;
-}
-
-/* json */
-
-#message_raw {
-  text-align: left;
-  max-width: 200px;
-  margin: auto;
-}
-
-.j_string {
-  color: green;
-}
-
-.j_number {
-  color: darkorange;
-}
-
-.j_boolean {
-  color: blue;
-}
-
-.j_null {
-  color: magenta;
-}
-
-.j_key {
-  color: red;
+  height: 128px;
+  width: 128px;
 }
 
 #temp_div {
@@ -53,16 +30,15 @@ div {
   font-size: .75em;
   padding: .2em 1em;
   display: inline-block;
+  color: #fff;
 }
 
 #accuracy.excellent {
   background-color: green;
-  color: #fff;
 }
 
 #accuracy.good {
   background-color: blue;
-  color: #fff;
 }
 
 #accuracy.adaquate {
@@ -77,28 +53,18 @@ div {
 
 #accuracy.awful {
   background-color: red;
-  color: #DDD;
 }
 
 #accuracy.updating {
-  background-color: #DDD;
+  background-color: #ddd;
   color: #000;
 }
 
-#main_info {
-  display: none;
-}
-
+#loading,
 #data_error {
   margin: 3em auto;
   font-size: 1.5em;
   color: #009879;
-}
-
-#loading {
-  color: #009879;
-  margin-top: 3em;
-  font-size: 1.5em;
 }
 
 #data_update_time {
@@ -135,7 +101,7 @@ td {
 }
 
 th span.units {
-  color: #DDD;
+  color: #ddd;
   display: block;
   font-size: .8em;
   font-weight: 400;
@@ -154,40 +120,33 @@ tbody tr:last-of-type {
   border-bottom: 2px solid #009879;
 }
 
-th.int,
-th.float,
-th.seconds,
-td.int,
-td.float,
-td.seconds {
+.int,
+.float,
+.seconds {
   text-align: right;
 }
 
-div.buttons {
-  margin-top: 1em;
-}
-
-#visualization {
-  display: none;
-}
-
-menu{
-  display:flex;
-  align-items: center;
+menu {
+  max-width: 500px;
+  margin: 1em auto;
+  display: flex;
   justify-content: center;
+  flex-wrap: wrap;
+  padding: 0;
 }
 
 li {
-  width: 6em;
   background-color: #999;
   color: #fff;
-  padding: .5em 0;
+  flex-grow: 1;
+  list-style: none;
+  padding: .5em 1em;
   margin: .2em;
-  display: inline-block;
+  max-width: 8em;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
 
-li:hover{
+li:hover {
   background-color: #888;
 }
 
@@ -197,19 +156,6 @@ li.selected {
 
 canvas {
   margin-top: 1em;
-}
-
-
-#scroll_top div {
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#scroll_top img {
-  height: 1.5em;
-  width: 1.5em;
-  color: #fff;
 }
 
 #scroll_top {
@@ -223,4 +169,44 @@ canvas {
   bottom: 2em;
   right: 2em;
   display: none;
+}
+
+#scroll_top div {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#scroll_top img {
+  height: 1.5em;
+  width: 1.5em;
+  color: #fff;
+}
+
+/* json */
+
+#message_raw {
+  text-align: left;
+  max-width: 200px;
+  margin: auto;
+}
+
+.j_string {
+  color: green;
+}
+
+.j_number {
+  color: darkorange;
+}
+
+.j_boolean {
+  color: blue;
+}
+
+.j_null {
+  color: magenta;
+}
+
+.j_key {
+  color: red;
 }
