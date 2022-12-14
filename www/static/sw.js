@@ -1,3 +1,4 @@
+
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open("v1");
   await cache.addAll(resources);
@@ -11,13 +12,14 @@ const cacheFirst = async (request) => {
   return fetch(request);
 };
 
-
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
       "/",
       "/static/styles.css",
       "/static/water.js",
+      "/static/chart.js",
+      "/static/chart-date.js",
       "/static/img/01d.png",
       "/static/img/01n.png",
       "/static/img/02d.png",
@@ -38,11 +40,20 @@ self.addEventListener("install", (event) => {
       "/static/img/50n.png",
       "/static/img/unknown.png",
       "/static/img/up.svg",
+      "/static/img/favicon-16x16.png",
+      "/static/img/favicon-32x32.png",
+      "/static/img/android-chrome-192x192.png",
+      "/static/site.webmanifest",
+      "/status?fast",
+      "/stats",
     ])
   );
 });
 
 self.addEventListener("fetch", (event) => {
-  console.log('fetch', event.request);
   event.respondWith(cacheFirst(event.request));
+});
+
+self.addEventListener('activate', function(event) {
+  return self.clients.claim();
 });
