@@ -503,6 +503,5 @@ document.querySelectorAll('li').forEach(
 );
 
 if ('serviceWorker' in navigator) {
-  alert('SW');
-  navigator.serviceWorker.register('static/sw.js');
+  navigator.serviceWorker.register('/sw.js', {'scope':'https://tollington.duckdns.org/'});
 }
