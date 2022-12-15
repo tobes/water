@@ -12,17 +12,29 @@ const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
 const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
 const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
 
+function set_element_text(id, text){
+  const el = document.getElementById(id);
+  if (el){
+    el.innerText = text;
+  } else {
+    console.log('element id `' + id '` not found');
+  }
+}
+
+function set_element_display(id, display){
+  const el = document.getElementById(id);
+  if (el){
+    el.style.display = (display ? 'block': 'none');
+  } else {
+    console.log('element id `' + id '` not found');
+  }
+}
 function update(data, automated) {
 
   let stale = stale_time(data, UPDATE_INTERVAL_STATUS);
-  if (stale) {
-    document.getElementById('stale_status_msg').innerText = 'Status ' + stale + ' old';
-    document.getElementById('stale_status').style.display = 'block';
-    STATE.offline = true;
-  } else {
-    document.getElementById('stale_status').style.display = 'none';
-    STATE.offline = false;
-  }
+  set_element_text('stale_status_msg', 'Status ' + stale + ' old');
+  set_element_display('stale_status', stale);
+  STATE.offline = Boolean(state);
 
   var w = data.weather.state;
   var temp = w.main.temp;
@@ -64,18 +76,18 @@ function update(data, automated) {
 
   let message_time = new Date(msg_time).toLocaleString(LOCALE, options_time);
 
-  document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
-  document.getElementById('temp').innerText = temp.toFixed(1);
-  document.getElementById('depth').innerText = depth;
-  document.getElementById('volume').innerText = volume;
-  document.getElementById('accuracy').innerText = accuracy_text + ' accuracy';
-  document.getElementById('accuracy').className = accuracy_text;
-  document.getElementById('pump_state').innerText = 'Pump ' + pump_state;
-  document.getElementById('message_time').innerText = message_time;
-  document.getElementById('message_date').innerText = message_date;
+  set_element_text('temp', temp.toFixed(1));
+  set_element_text('depth', depth);
+  set_element_text('volume', volume);
+  set_element_text('accuracy', accuracy_text + ' accuracy');
+  set_element_text('pump_state', 'Pump ' + pump_state);
+  set_element_text('message_time', message_time);
+  set_element_text('message_date', message_date);
 
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main_info').style.display = 'block';
+  document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
+  document.getElementById('accuracy').className = accuracy_text;
+  set_element_display('loading', false);
+  set_element_display('main_info', true);
 
   if (automated === true) {
     request('/stats', update_stats);
@@ -124,7 +136,7 @@ function update_status(automated, first) {
   clear_status_timeout();
 
   if (automated !== true) {
-    document.getElementById('accuracy').innerText = 'updating';
+    set_element_text('accuracy', 'updating');
     document.getElementById('accuracy').className = 'updating';
   }
 
@@ -433,12 +445,8 @@ function stale_time(data, allowed_age) {
 function update_stats(data) {
 
   let stale = stale_time(data, UPDATE_INTERVAL_STATS);
-  if (stale) {
-    document.getElementById('stale_stats_msg').innerText = 'Data ' + stale + ' old';
-    document.getElementById('stale_stats').style.display = 'block';
-  } else {
-    document.getElementById('stale_stats').style.display = 'none';
-  }
+  set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
+  set_element_display('stale_stats', stale);
 
   data.data.forEach(row => {
     let name = row.name;
@@ -455,7 +463,7 @@ function update_stats(data) {
       document.getElementById('options').appendChild(button);
     }
   });
-  document.getElementById('visualization').style.display = 'block';
+  set_element_display('visualization', true);
   const options_date = {
     weekday: 'long',
     year: 'numeric',
@@ -466,7 +474,7 @@ function update_stats(data) {
   };
 
   let message_time = new Date().toLocaleString(LOCALE, options_date);
-  document.getElementById('data_update_time').innerText = 'Updated: ' + message_time;
+  set_element_text('data_update_time', 'Updated: ' + message_time);
   show_selected();
 }
 
