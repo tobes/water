@@ -1,9 +1,12 @@
 /*jslint browser:true, esnext:true*/
 
-var update_timeout;
-let last_update = 0;
-let data_cache = {};
-let offline = true;
+const STATE = {
+  update_timeout: null,
+  last_update: 0,
+  data_cache: {},
+  offline: true
+}
+
 const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 06 * 5;
 const OFF_LINE_CHECK = 1000 * 5;
@@ -14,10 +17,10 @@ function update(data, automated) {
   if (stale) {
     document.getElementById('stale_status_msg').innerText = 'Status ' + stale + ' old';
     document.getElementById('stale_status').style.display = 'block';
-    offline = true;
+    STATE.offline = true;
   } else {
     document.getElementById('stale_status').style.display = 'none';
-    offline = false;
+    STATE.offline = false;
   }
 
   var w = data.weather.state;
@@ -102,10 +105,10 @@ function random_int(max) {
 
 function next_update() {
   var now = new Date().getTime();
-  if (now - last_update >= UPDATE_INTERVAL) {
+  if (now - STATE.last_update >= UPDATE_INTERVAL) {
     return 0;
   }
-  const interval = (offline ? OFF_LINE_CHECK :UPDATE_INTERVAL);
+  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL);
   let delay = (interval - now) % interval;
   //delay += random_int(interval * 0.01)
   if (delay < 5000) {
@@ -120,15 +123,15 @@ function update_status(automated, first) {
     document.getElementById('accuracy').innerText = 'updating';
     document.getElementById('accuracy').className = 'updating';
   }
-  if (update_timeout) {
-    clearTimeout(update_timeout);
+  if (STATE.update_timeout) {
+    clearTimeout(STATE.update_timeout);
   }
   let url = '/status';
   if (first) {
     url += '?fast';
   }
   request(url, update, automated);
-  last_update = new Date().getTime();
+  STATE.last_update = new Date().getTime();
   set_update_timer();
 }
 
@@ -204,7 +207,7 @@ function show_selected() {
 
   let cutoff = cut_off_date(period);
 
-  const data = data_cache[stat];
+  const data = STATE.data_cache[stat];
 
   let values = [];
 
@@ -437,7 +440,7 @@ function update_stats(data) {
 
   data.data.forEach(row => {
     let name = row.name;
-    data_cache[name] = row.data;
+    STATE.data_cache[name] = row.data;
     if (document.querySelector('[data-value=' + name + ']') === null) {
       let button = document.createElement('li');
       button.dataset.type = 'stat';
@@ -532,8 +535,8 @@ function scroll_top() {
 
 document.onvisibilitychange = () => {
   if (document.visibilityState === 'hidden') {
-    if (update_timeout) {
-      clearTimeout(update_timeout);
+    if (STATE.update_timeout) {
+      clearTimeout(STATE.update_timeout);
     }
   } else {
     set_update_timer();
@@ -542,10 +545,10 @@ document.onvisibilitychange = () => {
 
 
 function set_update_timer() {
-  if (update_timeout) {
-    clearTimeout(update_timeout);
+  if (STATE.update_timeout) {
+    clearTimeout(STATE.update_timeout);
   }
-  update_timeout = setTimeout(update_status, next_update(), true);
+  STATE.update_timeout = setTimeout(update_status, next_update(), true);
 }
 
 
