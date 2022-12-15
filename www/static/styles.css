@@ -60,6 +60,7 @@ div {
   color: #000;
 }
 
+.offline,
 #stale_stats_msg,
 #stale_status_msg,
 #loading,
@@ -67,6 +68,11 @@ div {
   margin: 3em auto;
   font-size: 1.5em;
   color: #009879;
+}
+
+#stale_stats_msg,
+#stale_status_msg {
+  font-size: 1em;
 }
 
 #data_update_time {

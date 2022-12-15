@@ -12,7 +12,7 @@ function update(data, automated) {
 
   let stale = stale_time(data);
   if (stale) {
-    document.getElementById('stale_status_msg').innerText = 'OFFLINE: Status ' + stale + ' old';
+    document.getElementById('stale_status_msg').innerText = 'Status ' + stale + ' old';
     document.getElementById('stale_status').style.display = 'block';
     offline = true;
   } else {
@@ -429,7 +429,7 @@ function update_stats(data) {
 
   let stale = stale_time(data);
   if (stale) {
-    document.getElementById('stale_stats_msg').innerText = 'OFFLINE: Data ' + stale + ' old';
+    document.getElementById('stale_stats_msg').innerText = 'Data ' + stale + ' old';
     document.getElementById('stale_stats').style.display = 'block';
   } else {
     document.getElementById('stale_stats').style.display = 'none';
