@@ -1,20 +1,4 @@
-
-const addResourcesToCache = async (resources) => {
-  const cache = await caches.open("v1");
-  await cache.addAll(resources);
-};
-
-const cacheFirst = async (request) => {
-  const responseFromCache = await caches.match(request);
-  if (responseFromCache) {
-    return responseFromCache;
-  }
-  return fetch(request);
-};
-
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    addResourcesToCache([
+RESOURCES = [
       "/",
       "/static/styles.css",
       "/static/water.js",
@@ -45,15 +29,57 @@ self.addEventListener("install", (event) => {
       "/static/img/android-chrome-192x192.png",
       "/static/site.webmanifest",
       "/status?fast",
-      "/stats",
-    ])
+      "/stats"
+]
+
+const addResourcesToCache = async (resources) => {
+  const cache = await caches.open("v1");
+  await cache.addAll(resources);
+};
+
+
+self.addEventListener("install", (event) => {
+  console.log('install');
+  event.waitUntil(
+    addResourcesToCache(RESOURCES)
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(cacheFirst(event.request));
-});
+const cache = async (request) => {
+  let resp;
+  let url = new URL(request.url);
+  let live = ['/status', '/stats'].indexOf(url.pathname) !== -1;
 
-self.addEventListener('activate', function(event) {
-  return self.clients.claim();
+  if (live){
+    resp = await fetch(request)
+    // handle network err/success
+    .then((response) => {
+        let resp = response.clone();
+        if (response.ok){
+	  console.log('LIVE', response);
+	  caches.open("v1").then((cache) => cache.put(response.url, response));
+	  return resp;
+	}
+    })
+    .catch(() => undefined);
+  }
+
+  if (resp !== undefined){
+    return resp;
+  }
+
+  const responseFromCache = await caches.match(request);
+
+  if (responseFromCache) {
+    console.log('FROM CACHE', request.url);
+    return responseFromCache;
+  }
+
+  console.log('***fetch***');
+  return fetch(request);
+}
+
+
+self.addEventListener("fetch", (event) => {
+  event.respondWith(cache(event.request));
 });
