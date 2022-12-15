@@ -8,7 +8,7 @@ const STATE = {
 }
 
 const LOCALE = 'en-GB';
-const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
+const UPDATE_INTERVAL_STATUS = 1000 * 60 * 60 * 5; // how often to update status (ms)
 const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
 const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
 
