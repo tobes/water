@@ -12,29 +12,30 @@ const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
 const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
 const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
 
-function set_element_text(id, text){
+function set_element_text(id, text) {
   const el = document.getElementById(id);
-  if (el){
+  if (el) {
     el.innerText = text;
   } else {
-    console.log('element id `' + id '` not found');
+    console.log('element id `' + id + '` not found');
   }
 }
 
-function set_element_display(id, display){
+function set_element_display(id, display) {
   const el = document.getElementById(id);
-  if (el){
-    el.style.display = (display ? 'block': 'none');
+  if (el) {
+    el.style.display = (display ? 'block' : 'none');
   } else {
-    console.log('element id `' + id '` not found');
+    console.log('element id `' + id + '` not found');
   }
 }
+
 function update(data, automated) {
 
   let stale = stale_time(data, UPDATE_INTERVAL_STATUS);
   set_element_text('stale_status_msg', 'Status ' + stale + ' old');
   set_element_display('stale_status', stale);
-  STATE.offline = Boolean(state);
+  STATE.offline = Boolean(stale);
 
   var w = data.weather.state;
   var temp = w.main.temp;
@@ -118,10 +119,10 @@ function random_int(max) {
 
 function next_update() {
   var now = new Date().getTime();
-  if (now - STATE.last_update >= UPDATE_INTERVAL) {
+  if (now - STATE.last_update >= UPDATE_INTERVAL_STATS) {
     return 0;
   }
-  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL);
+  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL_STATS);
   let delay = (interval - now) % interval;
   //delay += random_int(interval * 0.01)
   if (delay < 5000) {
@@ -543,7 +544,7 @@ function scroll_top() {
   }
 }
 
-clear_status_timeout(){
+function clear_status_timeout() {
   if (STATE.status_timeout) {
     clearTimeout(STATE.status_timeout);
   }
