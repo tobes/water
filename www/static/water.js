@@ -5,7 +5,7 @@ let last_update = 0;
 let data_cache = {};
 let offline = true;
 const LOCALE = 'en-GB';
-const UPDATE_INTERVAL = 1000 * 60 * 15;
+const UPDATE_INTERVAL = 1000 * 60 * 06 * 5;
 const OFF_LINE_CHECK = 1000 * 5;
 
 function update(data, automated) {
@@ -106,7 +106,7 @@ function next_update() {
     return 0;
   }
   const interval = (offline ? OFF_LINE_CHECK :UPDATE_INTERVAL);
-  let delay = interval - now % interval;
+  let delay = (interval - now) % interval;
   //delay += random_int(interval * 0.01)
   if (delay < 5000) {
     delay = 5000
@@ -543,7 +543,7 @@ document.onvisibilitychange = () => {
 
 function set_update_timer() {
   if (update_timeout) {
-    return;
+    clearTimeout(update_timeout);
   }
   update_timeout = setTimeout(update_status, next_update(), true);
 }
