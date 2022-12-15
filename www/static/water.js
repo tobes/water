@@ -134,7 +134,7 @@ function update_status(automated, first) {
   }
   request(url, update, automated);
   STATE.last_update = new Date().getTime();
-  set_update_timer();
+  set_status_timeout();
 }
 
 function yyyymmddToLocalDate(isoString) {
@@ -535,21 +535,13 @@ function scroll_top() {
   }
 }
 
-document.onvisibilitychange = () => {
-  if (document.visibilityState === 'hidden') {
-    clear_status_timeout();
-  } else {
-    set_update_timer();
-  }
-};
-
 clear_status_timeout(){
   if (STATE.status_timeout) {
     clearTimeout(STATE.status_timeout);
   }
 }
 
-function set_update_timer() {
+function set_status_timeout() {
   clear_status_timeout();
   STATE.status_timeout = setTimeout(update_status, next_update(), true);
 }
@@ -570,6 +562,14 @@ document.getElementById('main_info').addEventListener('click', update_status);
 document.querySelectorAll('li').forEach(
   el => el.addEventListener('click', button_select)
 );
+
+document.onvisibilitychange = () => {
+  if (document.visibilityState === 'hidden') {
+    clear_status_timeout();
+  } else {
+    set_status_timeout();
+  }
+};
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', {'scope':'https://tollington.duckdns.org/'});
