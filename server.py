@@ -81,6 +81,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         'error_traceback': traceback.format_tb(exc_traceback)
                         }
                 out['message_time'] = util.timestamp()
+                out['epoch_time'] = time.time()
               #  print(out)
                 r = json.dumps(out)
                 conn.sendall(r.encode())
