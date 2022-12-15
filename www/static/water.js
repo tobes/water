@@ -1,7 +1,7 @@
 /*jslint browser:true, esnext:true*/
 
 const STATE = {
-  update_timeout: null,
+  status_timeout: null,
   last_update: 0,
   data_cache: {},
   offline: true
@@ -120,13 +120,14 @@ function next_update() {
 
 
 function update_status(automated, first) {
+
+  clear_status_timeout();
+
   if (automated !== true) {
     document.getElementById('accuracy').innerText = 'updating';
     document.getElementById('accuracy').className = 'updating';
   }
-  if (STATE.update_timeout) {
-    clearTimeout(STATE.update_timeout);
-  }
+
   let url = '/status';
   if (first) {
     url += '?fast';
@@ -536,20 +537,21 @@ function scroll_top() {
 
 document.onvisibilitychange = () => {
   if (document.visibilityState === 'hidden') {
-    if (STATE.update_timeout) {
-      clearTimeout(STATE.update_timeout);
-    }
+    clear_status_timeout();
   } else {
     set_update_timer();
   }
 };
 
+clear_status_timeout(){
+  if (STATE.status_timeout) {
+    clearTimeout(STATE.status_timeout);
+  }
+}
 
 function set_update_timer() {
-  if (STATE.update_timeout) {
-    clearTimeout(STATE.update_timeout);
-  }
-  STATE.update_timeout = setTimeout(update_status, next_update(), true);
+  clear_status_timeout();
+  STATE.status_timeout = setTimeout(update_status, next_update(), true);
 }
 
 
