@@ -106,6 +106,9 @@ function request(url, callback, payload) {
       }
     }
   };
+  xhr.error = function() {
+    STATE.offline = true;
+  }
   xhr.send();
 }
 
