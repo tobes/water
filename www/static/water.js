@@ -3,8 +3,10 @@
 var update_timeout;
 let last_update = 0;
 let data_cache = {};
+let offline = true;
 const LOCALE = 'en-GB';
 const UPDATE_INTERVAL = 1000 * 60 * 15;
+const OFF_LINE_CHECK = 1000 * 5;
 
 function update(data, automated) {
 
@@ -12,8 +14,10 @@ function update(data, automated) {
   if (stale) {
     document.getElementById('stale_status_msg').innerText = 'OFFLINE: Status ' + stale + ' old';
     document.getElementById('stale_status').style.display = 'block';
+    offline = true;
   } else {
     document.getElementById('stale_status').style.display = 'none';
+    offline = false;
   }
 
   var w = data.weather.state;
@@ -101,8 +105,9 @@ function next_update() {
   if (now - last_update >= UPDATE_INTERVAL) {
     return 0;
   }
-  let delay = UPDATE_INTERVAL - now % UPDATE_INTERVAL;
-  delay += random_int(UPDATE_INTERVAL * 0.01)
+  const interval = (offline ? OFF_LINE_CHECK :UPDATE_INTERVAL);
+  let delay = interval - now % interval;
+  //delay += random_int(interval * 0.01)
   if (delay < 5000) {
     delay = 5000
   }
@@ -124,7 +129,7 @@ function update_status(automated, first) {
   }
   request(url, update, automated);
   last_update = new Date().getTime();
-  update_timeout = setTimeout(update_status, next_update(), true);
+  set_update_timer();
 }
 
 function yyyymmddToLocalDate(isoString) {
@@ -531,9 +536,18 @@ document.onvisibilitychange = () => {
       clearTimeout(update_timeout);
     }
   } else {
-    update_timeout = setTimeout(update_status, next_update(), true);
+    set_update_timer();
   }
 };
+
+
+function set_update_timer() {
+  if (update_timeout) {
+    return;
+  }
+  update_timeout = setTimeout(update_status, next_update(), true);
+}
+
 
 function init() {
   scroll_top();
