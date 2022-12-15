@@ -8,7 +8,7 @@ const STATE = {
 }
 
 const LOCALE = 'en-GB';
-const UPDATE_INTERVAL_STATUS = 1000 * 60 * 60 * 5; // how often to update status (ms)
+const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
 const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
 const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
 
@@ -118,20 +118,6 @@ function jlog(value) {
 
 function random_int(max) {
   return Math.floor(Math.random() * (Math.floor(max) + 1));
-}
-
-function next_update() {
-  var now = new Date().getTime();
-  if (now - STATE.last_update >= UPDATE_INTERVAL_STATS) {
-    return 0;
-  }
-  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL_STATS);
-  let delay = (interval - now) % interval;
-  //delay += random_int(interval * 0.01)
-  if (delay < 5000) {
-    delay = 5000
-  }
-  return delay;
 }
 
 
@@ -555,7 +541,16 @@ function clear_status_timeout() {
 
 function set_status_timeout() {
   clear_status_timeout();
-  STATE.status_timeout = setTimeout(update_status, next_update(), true);
+  var now = new Date().getTime();
+  if (now - STATE.last_update >= UPDATE_INTERVAL_STATUS) {
+    return 0;
+  }
+  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL_STATUS);
+  let delay = interval - now % interval;
+  if (delay < 5000) {
+    delay = 5000
+  }
+  STATE.status_timeout = setTimeout(update_status, delay, true);
 }
 
 
