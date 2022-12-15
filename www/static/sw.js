@@ -75,7 +75,7 @@ const cache = async (request) => {
     return responseFromCache;
   }
 
-  console.log('***fetch***');
+  console.log('***fetch***', request.url);
   return fetch(request);
 }
 
