@@ -49,7 +49,7 @@ function update(data, automated) {
   let message_time = new Date(msg_time).toLocaleString(LOCALE, options_time);
 
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
-  document.getElementById('temp').innerText = temp;
+  document.getElementById('temp').innerText = temp.toFixed(1);
   document.getElementById('depth').innerText = depth;
   document.getElementById('volume').innerText = volume;
   document.getElementById('accuracy').innerText = accuracy_text + ' accuracy';
