@@ -1,3 +1,5 @@
+import time
+
 from flask import make_response
 
 import db
@@ -242,13 +244,16 @@ def stats_weather():
 
 
 def get_stats():
-    output = [
+    output = {
+        'epoch_time': time.time(),
+        'data': [
         {'name': 'Auto','data': stats_auto()},
         {'name': 'Pump','data': stats_pump()},
         {'name': 'Weather','data': stats_weather()},
         {'name': 'Levels','data': stats_depths()},
         {'name': 'Volumes','data': stats_volumes()},
-    ]
+        ],
+    }
     response = make_response(output)
     response.mimetype = 'application/json'
     response.headers['Access-Control-Allow-Origin'] = '*'

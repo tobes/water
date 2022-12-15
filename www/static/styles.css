@@ -60,6 +60,8 @@ div {
   color: #000;
 }
 
+#stale_stats_msg,
+#stale_status_msg,
 #loading,
 #data_error {
   margin: 3em auto;

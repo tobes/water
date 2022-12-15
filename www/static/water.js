@@ -8,6 +8,14 @@ const UPDATE_INTERVAL = 1000 * 60 * 15;
 
 function update(data, automated) {
 
+  let stale = stale_time(data);
+  if (stale) {
+    document.getElementById('stale_status_msg').innerText = 'OFFLINE: Status ' + stale + ' old';
+    document.getElementById('stale_status').style.display = 'block';
+  } else {
+    document.getElementById('stale_status').style.display = 'none';
+  }
+
   var w = data.weather.state;
   var temp = w.main.temp;
   var icon = w.weather[0].icon;
@@ -377,9 +385,52 @@ function graph_resize() {
   });
 }
 
+
+function seconds_2_nice(seconds) {
+
+  let day = Math.floor(seconds / 86400);
+  if (day) {
+    return day + (day === 1 ? ' day' : ' days');
+  }
+
+  let parts = new Date(seconds * 1000).toISOString().substr(11, 8).split(':');
+  let hour = parseInt(parts[0]);
+  let min = parseInt(parts[1]);
+  let sec = parseInt(parts[2]);
+
+  if (hour) {
+    return hour + (hour === 1 ? ' hour' : ' hours');
+  }
+  if (min) {
+    return min + (min === 1 ? ' minute' : ' minutes');
+  }
+  return sec + (sec === 1 ? ' second' : ' seconds');
+}
+
+function stale_time(data) {
+
+  let data_epoch = data.epoch_time;
+  let current_epoch = new Date() / 1000;
+
+  let difference = current_epoch - data_epoch;
+  if (difference < 5) {
+    return;
+  }
+  return seconds_2_nice(Math.floor(difference));
+
+}
+
 function update_stats(data) {
 
-  data.forEach(row => {
+  let stale = stale_time(data);
+  if (stale) {
+    document.getElementById('stale_stats_msg').innerText = 'OFFLINE: Data ' + stale + ' old';
+    document.getElementById('stale_stats').style.display = 'block';
+  } else {
+    document.getElementById('stale_stats').style.display = 'none';
+  }
+
+  data.data.forEach(row => {
     let name = row.name;
     data_cache[name] = row.data;
     if (document.querySelector('[data-value=' + name + ']') === null) {
