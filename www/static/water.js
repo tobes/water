@@ -8,12 +8,13 @@ const STATE = {
 }
 
 const LOCALE = 'en-GB';
-const UPDATE_INTERVAL = 1000 * 60 * 06 * 5;
-const OFF_LINE_CHECK = 1000 * 5;
+const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
+const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
+const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
 
 function update(data, automated) {
 
-  let stale = stale_time(data);
+  let stale = stale_time(data, UPDATE_INTERVAL_STATUS);
   if (stale) {
     document.getElementById('stale_status_msg').innerText = 'Status ' + stale + ' old';
     document.getElementById('stale_status').style.display = 'block';
@@ -415,13 +416,13 @@ function seconds_2_nice(seconds) {
   return sec + (sec === 1 ? ' second' : ' seconds');
 }
 
-function stale_time(data) {
+function stale_time(data, allowed_age) {
 
   let data_epoch = data.epoch_time;
   let current_epoch = new Date() / 1000;
 
   let difference = current_epoch - data_epoch;
-  if (difference < 5) {
+  if (difference < allowed_age) {
     return;
   }
   return seconds_2_nice(Math.floor(difference));
@@ -430,7 +431,7 @@ function stale_time(data) {
 
 function update_stats(data) {
 
-  let stale = stale_time(data);
+  let stale = stale_time(data, UPDATE_INTERVAL_STATS);
   if (stale) {
     document.getElementById('stale_stats_msg').innerText = 'Data ' + stale + ' old';
     document.getElementById('stale_stats').style.display = 'block';
