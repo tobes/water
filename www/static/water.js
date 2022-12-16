@@ -164,7 +164,7 @@ function update_status(automated, first) {
   }
   make_http_request(url, update_status_display, automated);
 
-  STATE.last_status_request_time = new Date().getTime();
+  STATE.last_status_request_time = Date.now();
   set_status_timeout();
   // see if stats need updating
   set_stats_timeout();
@@ -174,7 +174,7 @@ function update_status(automated, first) {
 function update_stats() {
   // get stats
   make_http_request('/stats', update_stats_callback);
-  STATE.last_stats_request_time = new Date()
+  STATE.last_stats_request_time = Date.now();
   set_stats_timeout();
 }
 
@@ -455,7 +455,7 @@ function seconds_2_nice(seconds) {
 function stale_time(data, allowed_age) {
 
   const data_epoch = data.epoch_time;
-  const current_epoch = new Date() / 1000;
+  const current_epoch = Date.now() / 1000;
 
   const difference = current_epoch - data_epoch;
   // FIXME use due time
@@ -582,7 +582,7 @@ function clear_status_timeout() {
 
 
 function timeout_delay(last, max_delay, offline_check) {
-  const now = new Date().getTime();
+  const now = Date.now();
   if (now - last >= max_delay) {
     return 0;
   }
