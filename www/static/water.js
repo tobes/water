@@ -135,10 +135,7 @@ function make_http_request(url, callback, payload) {
       }
     }
   };
-  xhr.error = function() {
-    // FIXME do more/
-    STATE.offline = true;
-  }
+  xhr.addEventListener('error', () => STATE.offline = true);
   xhr.send();
 }
 
@@ -456,7 +453,7 @@ function stale_time(data, allowed_age) {
 
   let difference = current_epoch - data_epoch;
   // FIXME use due time
-  if (difference < allowed_age) {
+  if (difference < (allowed_age / 1000)) {
     return;
   }
   return seconds_2_nice(Math.floor(difference));
