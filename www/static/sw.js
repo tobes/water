@@ -83,3 +83,9 @@ const cache = async (request) => {
 self.addEventListener("fetch", (event) => {
   event.respondWith(cache(event.request));
 });
+
+
+self.addEventListener('activate', function(event) {
+  console.log('Claiming control');
+  return self.clients.claim();
+});

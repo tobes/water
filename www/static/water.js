@@ -107,6 +107,10 @@ function update_status_display(data, automated) {
   set_element_display('stale_status', stale);
   STATE.offline = Boolean(stale);
 
+  if (data === undefined){
+	  return;
+  }
+
   const w = data.weather.state;
   const pump = data['pump 1'];
   const sensor = data['sensor 1'];
@@ -139,7 +143,10 @@ function make_http_request(url, callback, payload) {
       }
     }
   };
-  xhr.addEventListener('error', () => STATE.offline = true);
+  xhr.onerror = () => {
+    STATE.offline = true;
+    callback();
+  }
   xhr.send();
 }
 
@@ -455,8 +462,11 @@ function seconds_2_nice(seconds) {
 
 function stale_time(data, due_time) {
   // check if our data is stale
+  if (data === undefined){
+    return ' ';
+  }
   const data_epoch = data.epoch_time;
-  const difference = data.epoch_time - (due_time / 1000);
+  const difference = (Date.now() / 1000) - data.epoch_time ;
   if (difference < 1) {
     return;
   }
@@ -489,6 +499,10 @@ function update_stats_callback(data) {
   const stale = stale_time(data, STATE.stats_due_time);
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
+
+  if (data === undefined){
+	  return;
+  }
 
   // process data
   data.data.forEach(row => {
@@ -620,6 +634,13 @@ function set_stats_timeout() {
 function init() {
   scroll_top();
   update_status(true, true);
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', {
+      'scope': 'https://tollington.duckdns.org/'
+    });
+  }
+
 }
 
 
@@ -643,12 +664,6 @@ document.onvisibilitychange = () => {
   }
 };
 
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js', {
-    'scope': 'https://tollington.duckdns.org/'
-  });
-}
 
 
 // FIXME unused
