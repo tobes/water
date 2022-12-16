@@ -202,8 +202,8 @@ function make_table_value(value, col_info) {
 
 function display_seconds(value) {
   // FIXME use Date()?
-  var minutes = Math.floor(value / 60);
-  var seconds = value - minutes * 60;
+  const minutes = Math.floor(value / 60);
+  const seconds = value - minutes * 60;
   return '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
@@ -218,11 +218,11 @@ function get_option(option) {
 function show_selected() {
 
   let display = get_option('display');
-  let cutoff = cut_off_date(get_option('period'));
+  const cutoff = cut_off_date(get_option('period'));
   const data = STATE.data_cache[get_option('stat')];
 
   // build our values
-  let values = [];
+  const values = [];
   if (data) {
     data.values.forEach(row => {
       if (yyyymmddToLocalDate(row[0]) > cutoff) {
@@ -257,9 +257,9 @@ function show_selected() {
       break;
   }
 
-  let data_div = document.getElementById('data')
+  const data_div = document.getElementById('data')
   // remove existing stat
-  let child_nodes = data_div.childNodes.forEach(el => el.remove());
+  data_div.childNodes.forEach(el => el.remove());
   // add new
   data_div.appendChild(el);
   graph_resize();
@@ -269,7 +269,7 @@ function show_selected() {
 function cut_off_date(days) {
   // create date starting days ago
   // for limiting data and graph axis
-  var d = new Date();
+  const d = new Date();
   d.setDate(d.getDate() - days);
   d.setHours(0, 0, 0, 0);
   return d;
@@ -312,11 +312,11 @@ function build_chart_data(scales, datasets) {
 
 
 function create_axis(axis, cutoff) {
-  let min_date = new Date(cutoff)
+  const min_date = new Date(cutoff)
   min_date.setHours(0, 0, 0, 0);
   min_date.setDate(min_date.getDate() + 1);
 
-  let max_date = new Date()
+  const max_date = new Date()
   max_date.setHours(0, 0, 0, 0)
 
   // create axis
@@ -360,7 +360,7 @@ function create_axis(axis, cutoff) {
 
 function create_graph(graph, cols, values, cutoff) {
   // get column index for each data
-  let col_index = {}
+  const col_index = {}
   for (let i = 0; i < cols.length; i++) {
     col_index[cols[i].title] = i;
   }
@@ -368,7 +368,7 @@ function create_graph(graph, cols, values, cutoff) {
   // build datasets
   const chart_data = [];
   for (const key in graph.dataset) {
-    let dataset = {
+    const dataset = {
       data: [],
       label: key,
       yAxisID: 'y'
@@ -377,10 +377,10 @@ function create_graph(graph, cols, values, cutoff) {
     Object.assign(dataset, graph.dataset[key] || {});
 
     // build chart data
-    let index = col_index[key];
+    const index = col_index[key];
     values.forEach(row => {
       // date is always first column in data
-      let date = new Date(row[0]);
+      const date = new Date(row[0]);
       dataset.data.push({
         x: date,
         y: row[index]
@@ -402,10 +402,10 @@ function graph_resize() {
   // resize graph
   let size;
 
-  let w = window.innerWidth;
-  let h = window.innerHeight;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
 
-  let ratio = 1.25;
+  const ratio = 1.25;
 
   if (h < w) {
     size = Math.floor(w / ratio);
@@ -415,7 +415,10 @@ function graph_resize() {
   size = Math.min(size, h)
 
   // graph container resizer triggers resize
-  document.querySelector('canvas').parentNode.style.height = size + 'px';
+  const el = document.querySelector('canvas');
+  if (el){
+    el.parentNode.style.height = size + 'px';
+  }
 }
 
 
@@ -429,15 +432,15 @@ function seconds_2_nice(seconds) {
     return value + ' ' + unit;
   }
 
-  let day = Math.floor(seconds / 86400);
+  const day = Math.floor(seconds / 86400);
   if (day) {
     return build(day, 'day');
   }
 
-  let parts = new Date(seconds * 1000).toISOString().substr(11, 8).split(':');
-  let hour = parseInt(parts[0]);
-  let min = parseInt(parts[1]);
-  let sec = parseInt(parts[2]);
+  const parts = new Date(seconds * 1000).toISOString().substr(11, 8).split(':');
+  const hour = parseInt(parts[0]);
+  const min = parseInt(parts[1]);
+  const sec = parseInt(parts[2]);
 
   if (hour) {
     return build(hour, 'hour');
@@ -451,10 +454,10 @@ function seconds_2_nice(seconds) {
 
 function stale_time(data, allowed_age) {
 
-  let data_epoch = data.epoch_time;
-  let current_epoch = new Date() / 1000;
+  const data_epoch = data.epoch_time;
+  const current_epoch = new Date() / 1000;
 
-  let difference = current_epoch - data_epoch;
+  const difference = current_epoch - data_epoch;
   // FIXME use due time
   if (difference < (allowed_age / 1000)) {
     return;
@@ -465,12 +468,12 @@ function stale_time(data, allowed_age) {
 function build_button(group, name) {
   // create buttons if missing
   if (document.querySelector('[data-value=' + name + ']') === null) {
-    let button = document.createElement('li');
+    const button = document.createElement('li');
     button.dataset.type = 'stat';
     button.dataset.value = name;
     button.innerText = name;
 
-    button_group = document.getElementById(group)
+    const button_group = document.getElementById(group)
     // first button selected
     if (button_group.childNodes.length === 0) {
       button.classList.add('selected');
@@ -484,13 +487,13 @@ function build_button(group, name) {
 function update_stats_callback(data) {
 
   // show if stale data
-  let stale = stale_time(data, UPDATE_INTERVAL_STATS);
+  const stale = stale_time(data, UPDATE_INTERVAL_STATS);
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
 
   // process data
   data.data.forEach(row => {
-    let name = row.name;
+    const name = row.name;
     // save the stat data
     STATE.data_cache[name] = row.data;
     build_button('options', name);
@@ -498,7 +501,7 @@ function update_stats_callback(data) {
 
   set_element_display('visualization', true);
 
-  let message_time = datetime_format(Date(), STATS_DATE_OPTIONS);
+  const message_time = datetime_format(Date(), STATS_DATE_OPTIONS);
   set_element_text('data_update_time', 'Updated: ' + message_time);
   show_selected();
 }
@@ -506,30 +509,30 @@ function update_stats_callback(data) {
 
 function create_table(cols, values) {
 
-  let table = document.createElement('table');
-  let thead = document.createElement('thead');
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
   table.appendChild(thead);
   let tr = document.createElement('tr');
   thead.appendChild(tr);
   for (const col of cols) {
-    let th = document.createElement('th');
+    const th = document.createElement('th');
     th.innerText = col.title;
     th.setAttribute('class', col.type);
     if (col.units) {
-      let units = document.createElement('span');
+      const units = document.createElement('span');
       units.innerText = col.units;
       units.classList.add('units');
       th.append(units);
     }
     tr.appendChild(th);
   }
-  let tbody = document.createElement('tbody');
+  const tbody = document.createElement('tbody');
   table.appendChild(tbody);
   values.forEach(row => {
-    let tr = document.createElement('tr');
+    const tr = document.createElement('tr');
     tbody.appendChild(tr);
     for (let i = 0; i < cols.length; i++) {
-      let td = document.createElement('td');
+      const td = document.createElement('td');
       td.setAttribute('class', cols[i].type);
       td.innerText = make_table_value(row[i], cols[i]);
       tr.appendChild(td);
@@ -540,7 +543,7 @@ function create_table(cols, values) {
 
 
 function option_button_click(event) {
-  let type = event.target.dataset.type;
+  const type = event.target.dataset.type;
   document.querySelectorAll('[data-type=' + type + ']').forEach(
     el => el.classList.remove('selected')
   );
@@ -550,7 +553,7 @@ function option_button_click(event) {
 
 
 function move_scroll_top() {
-  let el = document.getElementById('scroll_top');
+  const el = document.getElementById('scroll_top');
   if (window.scrollY < 50) {
     el.style.display = 'none';
   } else {
@@ -579,7 +582,7 @@ function clear_status_timeout() {
 
 
 function timeout_delay(last, max_delay, offline_check) {
-  var now = new Date().getTime();
+  const now = new Date().getTime();
   if (now - last >= max_delay) {
     return 0;
   }
@@ -598,7 +601,7 @@ function timeout_delay(last, max_delay, offline_check) {
 function set_status_timeout() {
   clear_status_timeout();
   const last = STATE.last_status_request_time;
-  let delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
+  const delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
   STATE.status_timeout = setTimeout(update_status, delay, true);
 }
 
@@ -608,7 +611,7 @@ function set_stats_timeout() {
     clearTimeout(STATE.stats_timeout);
   }
   const last = STATE.last_stats_request_time;
-  let delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
+  const delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
   STATE.stats_timeout = setTimeout(update_stats, delay, true);
 }
 
