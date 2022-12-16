@@ -1,14 +1,5 @@
 /*jslint browser:true, esnext:true*/
 
-const STATE = {
-  status_timeout: null,
-  stats_timeout: null,
-  last_status_request_time: 0,
-  last_stats_request_time: 0,
-  data_cache: {},
-  offline: true
-}
-
 const LOCALE = 'en-GB';
 
 // how often to update status (ms)
@@ -47,6 +38,17 @@ const TABLE_DATE_OPTIONS = {
   month: 'short',
   day: 'numeric',
 };
+
+
+const STATE = {
+  status_timeout: null,
+  stats_timeout: null,
+  last_status_request_time: 0,
+  last_stats_request_time: 0,
+  data_cache: {},
+  offline: true
+}
+
 
 function datetime_format(datetime, format_options) {
   // format datetime in locale using options
@@ -121,7 +123,6 @@ function update_status_display(data, automated) {
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
   set_element_display('loading', false);
   set_element_display('main_info', true);
-
 }
 
 
@@ -412,6 +413,7 @@ function graph_resize() {
   }
   size = Math.min(size, h)
 
+  // graph container resizer triggers resize
   document.querySelector('canvas').parentNode.style.height = size + 'px';
 }
 
@@ -466,7 +468,6 @@ function build_button(group, name) {
     button.dataset.type = 'stat';
     button.dataset.value = name;
     button.innerText = name;
-
 
     button_group = document.getElementById(group)
     // first button selected
@@ -575,6 +576,7 @@ function clear_status_timeout() {
   }
 }
 
+
 function timeout_delay(last, max_delay, offline_check) {
   var now = new Date().getTime();
   if (now - last >= max_delay) {
@@ -590,6 +592,7 @@ function timeout_delay(last, max_delay, offline_check) {
   }
   return delay;
 }
+
 
 function set_status_timeout() {
   clear_status_timeout();
