@@ -3,14 +3,14 @@
 
 const LOCALE = 'en-GB';
 
-// how often to update status (ms)
-const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5;
+// how often to update status (seconds)
+const UPDATE_INTERVAL_STATUS = 60 * 5;
 
-// how often to update stats (ms);
-const UPDATE_INTERVAL_STATS = 1000 * 60 * 60;
+// how often to update stats (seconds);
+const UPDATE_INTERVAL_STATS = 60 * 60;
 
-// if offline check if online every (ms)
-const OFF_LINE_CHECK = 1000 * 60;
+// if offline check if online every (seconds)
+const OFF_LINE_CHECK = 60;
 
 const STATS_DATE_OPTIONS = {
   weekday: 'long',
@@ -46,7 +46,7 @@ const STATE = {
   stats_timeout: null,
   last_status_request_time: 0,
   last_stats_request_time: 0,
-  status_due_time: 0,
+  status_due_time: null,
   stats_due_time: 0,
   data_cache: {},
   offline: true
@@ -102,7 +102,7 @@ function set_element_display(id, display) {
 function update_status_display(data, automated) {
   // update the status infomation shown
 
-  const stale = stale_time(data, STATE.status_due_time);
+  const stale = stale_time(data, UPDATE_INTERVAL_STATUS);
   set_element_text('stale_status_msg', 'Status ' + stale + ' old');
   set_element_display('stale_status', stale);
   STATE.offline = Boolean(stale);
@@ -166,17 +166,14 @@ function update_status(automated, first) {
     update_accuracy_text('updating');
   }
 
-  // we want our initial request as fast as possible
-  let url = '/status';
-  if (first) {
-    url += '?fast';
-  }
-  make_http_request(url, update_status_display, automated);
+  make_http_request('/status', update_status_display, automated);
 
   STATE.last_status_request_time = Date.now();
   set_status_timeout();
   // see if stats need updating
-  set_stats_timeout();
+  if (!STATE.offline){
+    set_stats_timeout();
+  }
 }
 
 
@@ -460,14 +457,14 @@ function seconds_2_nice(seconds) {
 }
 
 
-function stale_time(data, due_time) {
+function stale_time(data, limit) {
+
   // check if our data is stale
   if (data === undefined){
     return ' ';
   }
-  const data_epoch = data.epoch_time;
   const difference = (Date.now() / 1000) - data.epoch_time ;
-  if (difference < 1) {
+  if (difference < limit) {
     return;
   }
   return seconds_2_nice(Math.floor(difference));
@@ -496,7 +493,7 @@ function build_button(group, name) {
 function update_stats_callback(data) {
 
   // show if stale data
-  const stale = stale_time(data, STATE.stats_due_time);
+  const stale = stale_time(data, UPDATE_INTERVAL_STATS);
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
 
@@ -595,13 +592,14 @@ function clear_status_timeout() {
 
 
 function timeout_delay(last, max_delay, offline_check) {
+  max_delay *= 1000;  // ms
   const now = Date.now();
   if (now - last >= max_delay) {
     return 0;
   }
 
   if (offline_check && STATE.offline) {
-    max_delay = OFF_LINE_CHECK;
+    max_delay = OFF_LINE_CHECK * 1000;
   }
   let delay = max_delay - now % max_delay;
   if (delay < 5000) {
@@ -615,7 +613,9 @@ function set_status_timeout() {
   clear_status_timeout();
   const last = STATE.last_status_request_time;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
-  STATE.status_due_time = Date.now() + delay;
+  if (STATE.status_due_time === null){
+    STATE.status_due_time = Date.now() + delay;
+  }
   STATE.status_timeout = setTimeout(update_status, delay, true);
 }
 
@@ -633,7 +633,6 @@ function set_stats_timeout() {
 
 function init() {
   scroll_top();
-  update_status(true, true);
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', {
@@ -641,6 +640,7 @@ function init() {
     });
   }
 
+  update_status(true);
 }
 
 
