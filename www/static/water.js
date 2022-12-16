@@ -46,6 +46,8 @@ const STATE = {
   stats_timeout: null,
   last_status_request_time: 0,
   last_stats_request_time: 0,
+  status_due_time: 0,
+  stats_due_time: 0,
   data_cache: {},
   offline: true
 }
@@ -100,7 +102,7 @@ function set_element_display(id, display) {
 function update_status_display(data, automated) {
   // update the status infomation shown
 
-  const stale = stale_time(data, UPDATE_INTERVAL_STATUS);
+  const stale = stale_time(data, STATE.status_due_time);
   set_element_text('stale_status_msg', 'Status ' + stale + ' old');
   set_element_display('stale_status', stale);
   STATE.offline = Boolean(stale);
@@ -201,7 +203,6 @@ function make_table_value(value, col_info) {
 
 
 function display_seconds(value) {
-  // FIXME use Date()?
   const minutes = Math.floor(value / 60);
   const seconds = value - minutes * 60;
   return '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
@@ -452,18 +453,16 @@ function seconds_2_nice(seconds) {
 }
 
 
-function stale_time(data, allowed_age) {
-
+function stale_time(data, due_time) {
+  // check if our data is stale
   const data_epoch = data.epoch_time;
-  const current_epoch = Date.now() / 1000;
-
-  const difference = current_epoch - data_epoch;
-  // FIXME use due time
-  if (difference < (allowed_age / 1000)) {
+  const difference = data.epoch_time - (due_time / 1000);
+  if (difference < 1) {
     return;
   }
   return seconds_2_nice(Math.floor(difference));
 }
+
 
 function build_button(group, name) {
   // create buttons if missing
@@ -487,7 +486,7 @@ function build_button(group, name) {
 function update_stats_callback(data) {
 
   // show if stale data
-  const stale = stale_time(data, UPDATE_INTERVAL_STATS);
+  const stale = stale_time(data, STATE.stats_due_time);
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
 
@@ -602,6 +601,7 @@ function set_status_timeout() {
   clear_status_timeout();
   const last = STATE.last_status_request_time;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
+  STATE.status_due_time = Date.now() + delay;
   STATE.status_timeout = setTimeout(update_status, delay, true);
 }
 
@@ -612,6 +612,7 @@ function set_stats_timeout() {
   }
   const last = STATE.last_stats_request_time;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
+  STATE.stats_due_time = Date.now() + delay;
   STATE.stats_timeout = setTimeout(update_stats, delay, true);
 }
 
@@ -619,7 +620,6 @@ function set_stats_timeout() {
 function init() {
   scroll_top();
   update_status(true, true);
-  set_stats_timeout();
 }
 
 
