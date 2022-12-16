@@ -1,4 +1,5 @@
 /*jslint browser:true, esnext:true*/
+'use strict';
 
 const LOCALE = 'en-GB';
 
@@ -99,14 +100,14 @@ function set_element_display(id, display) {
 function update_status_display(data, automated) {
   // update the status infomation shown
 
-  let stale = stale_time(data, UPDATE_INTERVAL_STATUS);
+  const stale = stale_time(data, UPDATE_INTERVAL_STATUS);
   set_element_text('stale_status_msg', 'Status ' + stale + ' old');
   set_element_display('stale_status', stale);
   STATE.offline = Boolean(stale);
 
-  var w = data.weather.state;
-  var pump = data['pump 1'];
-  var sensor = data['sensor 1'];
+  const w = data.weather.state;
+  const pump = data['pump 1'];
+  const sensor = data['sensor 1'];
 
   update_accuracy_text(accuracy_2_text(sensor.accuracy), ' accuracy');
 
@@ -115,11 +116,11 @@ function update_status_display(data, automated) {
   set_element_text('volume', sensor.volume);
   set_element_text('pump_state', 'Pump ' + pump.pump_state);
 
-  var msg_time = data.message_time;
+  const msg_time = data.message_time;
   set_element_text('message_time', datetime_format(msg_time, STATUS_TIME_OPTIONS));
   set_element_text('message_date', datetime_format(msg_time, STATUS_DATE_OPTIONS));
 
-  var icon = w.weather[0].icon;
+  const icon = w.weather[0].icon;
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
   set_element_display('loading', false);
   set_element_display('main_info', true);
@@ -127,7 +128,7 @@ function update_status_display(data, automated) {
 
 
 function make_http_request(url, callback, payload) {
-  var xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
   xhr.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
