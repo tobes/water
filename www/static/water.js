@@ -2,17 +2,78 @@
 
 const STATE = {
   status_timeout: null,
-  last_update: 0,
+  stats_timeout: null,
+  last_status_request_time: 0,
+  last_stats_request_time: 0,
   data_cache: {},
   offline: true
 }
 
 const LOCALE = 'en-GB';
-const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5; // how often to update status (ms)
-const UPDATE_INTERVAL_STATS = 1000 * 60 * 60 // how often to update stats (ms);
-const OFF_LINE_CHECK = 1000 * 60; // if offline check if online every (ms)
+
+// how often to update status (ms)
+const UPDATE_INTERVAL_STATUS = 1000 * 60 * 5;
+
+// how often to update stats (ms);
+const UPDATE_INTERVAL_STATS = 1000 * 60 * 60;
+
+// if offline check if online every (ms)
+const OFF_LINE_CHECK = 1000 * 60;
+
+const STATS_DATE_OPTIONS = {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+};
+
+const STATUS_DATE_OPTIONS = {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+};
+
+const STATUS_TIME_OPTIONS = {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric'
+};
+
+const TABLE_DATE_OPTIONS = {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+};
+
+function datetime_format(datetime, format_options) {
+  // format datetime in locale using options
+  return new Date(datetime).toLocaleString(LOCALE, format_options);
+}
+
+
+function accuracy_2_text(accuracy) {
+  // convert an accuracy score to english
+  if (accuracy === 0) {
+    return 'excellent';
+  }
+  if (accuracy < 0.5) {
+    return 'good';
+  }
+  if (accuracy < 2) {
+    return 'adaquate';
+  }
+  if (accuracy < 4) {
+    return 'poor';
+  }
+  return 'awful';
+}
+
 
 function set_element_text(id, text) {
+  // set elements text
   const el = document.getElementById(id);
   if (el) {
     el.innerText = text;
@@ -21,7 +82,9 @@ function set_element_text(id, text) {
   }
 }
 
+
 function set_element_display(id, display) {
+  // set elements display style 'block' or 'none'
   const el = document.getElementById(id);
   if (el) {
     el.style.display = (display ? 'block' : 'none');
@@ -30,7 +93,9 @@ function set_element_display(id, display) {
   }
 }
 
-function update(data, automated) {
+
+function update_status_display(data, automated) {
+  // update the status infomation shown
 
   let stale = stale_time(data, UPDATE_INTERVAL_STATUS);
   set_element_text('stale_status_msg', 'Status ' + stale + ' old');
@@ -38,65 +103,29 @@ function update(data, automated) {
   STATE.offline = Boolean(stale);
 
   var w = data.weather.state;
-  var temp = w.main.temp;
-  var icon = w.weather[0].icon;
-  var sensor = data['sensor 1'];
-  var depth = sensor.depth;
-  var volume = sensor.volume;
-  var accuracy = sensor.accuracy;
   var pump = data['pump 1'];
-  var pump_state = pump.state;
+  var sensor = data['sensor 1'];
+
+  update_accuracy_text(accuracy_2_text(sensor.accuracy), ' accuracy');
+
+  set_element_text('temp', w.main.temp.toFixed(1));
+  set_element_text('depth', sensor.depth);
+  set_element_text('volume', sensor.volume);
+  set_element_text('pump_state', 'Pump ' + pump.pump_state);
+
   var msg_time = data.message_time;
+  set_element_text('message_time', datetime_format(msg_time, STATUS_TIME_OPTIONS));
+  set_element_text('message_date', datetime_format(msg_time, STATUS_DATE_OPTIONS));
 
-  var accuracy_text;
-
-  if (accuracy === 0) {
-    accuracy_text = 'excellent';
-  } else if (accuracy < 0.5) {
-    accuracy_text = 'good';
-  } else if (accuracy < 2) {
-    accuracy_text = 'adaquate';
-  } else if (accuracy < 4) {
-    accuracy_text = 'poor';
-  } else {
-    accuracy_text = 'awful';
-  }
-  const options_date = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-  let message_date = new Date(msg_time).toLocaleString(LOCALE, options_date);
-
-  const options_time = {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
-  };
-
-  let message_time = new Date(msg_time).toLocaleString(LOCALE, options_time);
-
-  set_element_text('temp', temp.toFixed(1));
-  set_element_text('depth', depth);
-  set_element_text('volume', volume);
-  set_element_text('accuracy', accuracy_text + ' accuracy');
-  set_element_text('pump_state', 'Pump ' + pump_state);
-  set_element_text('message_time', message_time);
-  set_element_text('message_date', message_date);
-
+  var icon = w.weather[0].icon;
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
-  document.getElementById('accuracy').className = accuracy_text;
   set_element_display('loading', false);
   set_element_display('main_info', true);
 
-  if (automated === true) {
-    request('/stats', update_stats);
-  }
 }
 
 
-function request(url, callback, payload) {
+function make_http_request(url, callback, payload) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
   xhr.onreadystatechange = function() {
@@ -107,17 +136,16 @@ function request(url, callback, payload) {
     }
   };
   xhr.error = function() {
+    // FIXME do more/
     STATE.offline = true;
   }
   xhr.send();
 }
 
-function jlog(value) {
-  console.log(JSON.stringify(value, undefined, 4))
-}
 
-function random_int(max) {
-  return Math.floor(Math.random() * (Math.floor(max) + 1));
+function update_accuracy_text(text, post_fix = '') {
+  set_element_text('accuracy', text + post_fix);
+  document.getElementById('accuracy').className = text;
 }
 
 
@@ -125,96 +153,77 @@ function update_status(automated, first) {
 
   clear_status_timeout();
 
+  // user feedback on update
   if (automated !== true) {
-    set_element_text('accuracy', 'updating');
-    document.getElementById('accuracy').className = 'updating';
+    update_accuracy_text('updating');
   }
 
+  // we want our initial request as fast as possible
   let url = '/status';
   if (first) {
     url += '?fast';
   }
-  request(url, update, automated);
-  STATE.last_update = new Date().getTime();
+  make_http_request(url, update_status_display, automated);
+
+  STATE.last_status_request_time = new Date().getTime();
   set_status_timeout();
+  // see if stats need updating
+  set_stats_timeout();
 }
+
+
+function update_stats() {
+  // get stats
+  make_http_request('/stats', update_stats_callback);
+  STATE.last_stats_request_time = new Date()
+  set_stats_timeout();
+}
+
 
 function yyyymmddToLocalDate(isoString) {
   const [year, month, day] = isoString.split('-');
   return new Date(year, month - 1, day);
 }
 
-function make_value(value, col_info) {
-  if (col_info.type === 'date') {
-    const options = {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    };
-    value = new Date(value).toLocaleString(LOCALE, options);
-  }
 
-  if (col_info.type === 'time') {
-    value = value.substring(0, 5);
+function make_table_value(value, col_info) {
+  switch (col_info.type) {
+    case 'date':
+      return datetime_format(value, TABLE_DATE_OPTIONS);
+    case 'time':
+      return value.substring(0, 5);
+    case 'float':
+      return value.toFixed(1);
+    case 'seconds':
+      return display_seconds(value);
   }
-
-  if (col_info.type === 'float') {
-    value = value.toFixed(1);
-  }
-
-  if (col_info.type === 'seconds') {
-    value = display_seconds(value);
-  }
-
   return value;
 }
 
+
 function display_seconds(value) {
+  // FIXME use Date()?
   var minutes = Math.floor(value / 60);
   var seconds = value - minutes * 60;
   return '' + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
-function show_selected_table() {
-  let selected_option = document.querySelector('li.option.selected');
-  if (selected_option === null) {
-    return;
-  }
 
-  let selected = selected_option.dataset.select;
-
-  document.querySelectorAll('table').forEach(el => {
-    if (el.dataset.name === selected) {
-      el.style.display = 'table';
-    } else {
-      el.style.display = 'none';
-    }
-  });
-
-  document.querySelectorAll('canvas').forEach(el => el.style.display = 'none');
+function get_option(option) {
+  // get option value
+  const selected_option = document.querySelector('[data-type=' + option + '].selected');
+  return selected_option.dataset.value;
 }
-
 
 
 function show_selected() {
 
-  let selected_option = document.querySelector('[data-type=stat].selected');
-  let selected_display = document.querySelector('[data-type=display].selected');
-  let selected_period = document.querySelector('[data-type=period].selected');
-  if (selected_option === null || selected_display === null || selected_period === null) {
-    return;
-  }
+  let display = get_option('display');
+  let cutoff = cut_off_date(get_option('period'));
+  const data = STATE.data_cache[get_option('stat')];
 
-  let stat = selected_option.dataset.value;
-  let display = selected_display.dataset.value;
-  let period = selected_period.dataset.value;
-
-  let cutoff = cut_off_date(period);
-
-  const data = STATE.data_cache[stat];
-
+  // build our values
   let values = [];
-
   if (data) {
     data.values.forEach(row => {
       if (yyyymmddToLocalDate(row[0]) > cutoff) {
@@ -248,80 +257,32 @@ function show_selected() {
       el.innerText = 'Sorry not available';
       break;
   }
-  update_stat_display(el);
+
+  let data_div = document.getElementById('data')
+  // remove existing stat
+  let child_nodes = data_div.childNodes.forEach(el => el.remove());
+  // add new
+  data_div.appendChild(el);
+  graph_resize();
 }
 
-function update_stat_display(content) {
-  let data_div = document.getElementById('data')
-  data_div.appendChild(content);
-  graph_resize();
-  let child_nodes = data_div.childNodes.forEach(el => {
-    if (el !== content) {
-      el.remove();
-    }
-  });
-}
 
 function cut_off_date(days) {
+  // create date starting days ago
+  // for limiting data and graph axis
   var d = new Date();
   d.setDate(d.getDate() - days);
   d.setHours(0, 0, 0, 0);
   return d;
 }
 
-function create_graph(graph, cols, values, cutoff) {
-  let min_date = new Date(cutoff)
-  min_date.setHours(0, 0, 0, 0);
-  min_date.setDate(min_date.getDate() + 1);
 
-  let max_date = new Date()
-  max_date.setHours(0, 0, 0, 0)
-
-  let scales = {
-    x: {
-      type: 'time',
-      time: {
-        unit: 'day'
-      },
-      min: min_date,
-      max: max_date
-    }
-  }
-
-  for (const key in graph.axis) {
-    if (!scales[key]) {
-      scales[key] = {};
-    }
-    Object.assign(scales[key], graph.axis[key]);
-  }
-
-  let col_index = {}
-  for (let i = 0; i < cols.length; i++) {
-    col_index[cols[i].title] = i;
-  }
-
-  let chart_data = [];
-
-  for (const key in graph.dataset) {
-    let dataset = {
-      data: [],
-      label: key,
-      yAxisID: 'y'
-    };
-    Object.assign(dataset, graph.dataset[key] || {});
-    let index = col_index[key];
-    values.forEach(row => {
-      let date = new Date(row[0]);
-      dataset.data.push({
-        x: date,
-        y: row[index]
-      });
-    });
-    chart_data.push(dataset)
-  }
-
-  let chart_ = {
+function build_chart_data(scales, datasets) {
+  return {
     type: 'line',
+    data: {
+      datasets: datasets
+    },
     options: {
       animation: false,
       maintainAspectRatio: false,
@@ -348,11 +309,41 @@ function create_graph(graph, cols, values, cutoff) {
       }
     }
   }
+}
+
+
+function create_axis(axis, cutoff) {
+  let min_date = new Date(cutoff)
+  min_date.setHours(0, 0, 0, 0);
+  min_date.setDate(min_date.getDate() + 1);
+
+  let max_date = new Date()
+  max_date.setHours(0, 0, 0, 0)
+
+  // create axis
+  const scales = {
+    x: {
+      type: 'time',
+      time: {
+        unit: 'day'
+      },
+      min: min_date,
+      max: max_date
+    }
+  }
+
+  // merge in our axis
+  for (const key in axis) {
+    if (!scales[key]) {
+      scales[key] = {};
+    }
+    Object.assign(scales[key], axis[key]);
+  }
 
   // any tick callback functions
-  let fn;
   for (const key in scales) {
     if (scales[key].tick_units) {
+      let fn;
       if (!scales[key].ticks) {
         scales[key].ticks = {};
       }
@@ -364,20 +355,52 @@ function create_graph(graph, cols, values, cutoff) {
       scales[key].ticks.callback = fn;
     }
   }
-  Object.assign(chart_.options.scales, scales);
+  return scales;
+}
 
 
-  chart_['data'] = {
-    'datasets': chart_data
-  };
+function create_graph(graph, cols, values, cutoff) {
+  // get column index for each data
+  let col_index = {}
+  for (let i = 0; i < cols.length; i++) {
+    col_index[cols[i].title] = i;
+  }
 
+  // build datasets
+  const chart_data = [];
+  for (const key in graph.dataset) {
+    let dataset = {
+      data: [],
+      label: key,
+      yAxisID: 'y'
+    };
+    // merge our data set info
+    Object.assign(dataset, graph.dataset[key] || {});
+
+    // build chart data
+    let index = col_index[key];
+    values.forEach(row => {
+      // date is always first column in data
+      let date = new Date(row[0]);
+      dataset.data.push({
+        x: date,
+        y: row[index]
+      });
+    });
+    chart_data.push(dataset)
+  }
+
+  const axis = create_axis(graph.axis, cutoff);
+  const chart_ = build_chart_data(axis, chart_data);
 
   const canvas = document.createElement('canvas');
   new Chart(canvas, chart_);
   return canvas;
 }
 
+
 function graph_resize() {
+  // resize graph
   let size;
 
   let w = window.innerWidth;
@@ -392,17 +415,23 @@ function graph_resize() {
   }
   size = Math.min(size, h)
 
-  document.querySelectorAll('canvas').forEach(el => {
-    el.parentNode.style.height = size + 'px';
-  });
+  document.querySelector('canvas').parentNode.style.height = size + 'px';
 }
 
 
 function seconds_2_nice(seconds) {
+  // human friendly time period eg '5 minutes'
+
+  function build(value, unit) {
+    if (unit !== 1) {
+      unit += 's';
+    }
+    return value + ' ' + unit;
+  }
 
   let day = Math.floor(seconds / 86400);
   if (day) {
-    return day + (day === 1 ? ' day' : ' days');
+    return build(day, 'day');
   }
 
   let parts = new Date(seconds * 1000).toISOString().substr(11, 8).split(':');
@@ -411,13 +440,14 @@ function seconds_2_nice(seconds) {
   let sec = parseInt(parts[2]);
 
   if (hour) {
-    return hour + (hour === 1 ? ' hour' : ' hours');
+    return build(hour, 'hour');
   }
   if (min) {
-    return min + (min === 1 ? ' minute' : ' minutes');
+    return build(min, 'minute');
   }
-  return sec + (sec === 1 ? ' second' : ' seconds');
+  return build(sec, 'second');
 }
+
 
 function stale_time(data, allowed_age) {
 
@@ -425,48 +455,55 @@ function stale_time(data, allowed_age) {
   let current_epoch = new Date() / 1000;
 
   let difference = current_epoch - data_epoch;
+  // FIXME use due time
   if (difference < allowed_age) {
     return;
   }
   return seconds_2_nice(Math.floor(difference));
-
 }
 
-function update_stats(data) {
+function build_button(group, name) {
+  // create buttons if missing
+  if (document.querySelector('[data-value=' + name + ']') === null) {
+    let button = document.createElement('li');
+    button.dataset.type = 'stat';
+    button.dataset.value = name;
+    button.innerText = name;
 
+
+    button_group = document.getElementById(group)
+    // first button selected
+    if (button_group.childNodes.length === 0) {
+      button.classList.add('selected');
+    }
+    button.addEventListener('click', option_button_click);
+    button_group.appendChild(button);
+  }
+}
+
+
+function update_stats_callback(data) {
+
+  // show if stale data
   let stale = stale_time(data, UPDATE_INTERVAL_STATS);
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
 
+  // process data
   data.data.forEach(row => {
     let name = row.name;
+    // save the stat data
     STATE.data_cache[name] = row.data;
-    if (document.querySelector('[data-value=' + name + ']') === null) {
-      let button = document.createElement('li');
-      button.dataset.type = 'stat';
-      button.dataset.value = name;
-      button.innerText = name;
-      if (document.querySelectorAll('#options li').length === 0) {
-        button.classList.add('selected');
-      }
-      button.addEventListener('click', button_select);
-      document.getElementById('options').appendChild(button);
-    }
+    build_button('options', name);
   });
-  set_element_display('visualization', true);
-  const options_date = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  };
 
-  let message_time = new Date().toLocaleString(LOCALE, options_date);
+  set_element_display('visualization', true);
+
+  let message_time = datetime_format(Date(), STATS_DATE_OPTIONS);
   set_element_text('data_update_time', 'Updated: ' + message_time);
   show_selected();
 }
+
 
 function create_table(cols, values) {
 
@@ -493,18 +530,17 @@ function create_table(cols, values) {
     let tr = document.createElement('tr');
     tbody.appendChild(tr);
     for (let i = 0; i < cols.length; i++) {
-      let value = make_value(row[i], cols[i]);
       let td = document.createElement('td');
       td.setAttribute('class', cols[i].type);
-      td.innerText = value;
+      td.innerText = make_table_value(row[i], cols[i]);
       tr.appendChild(td);
     }
   });
-  //table.dataset.name = stat;
   return table;
 }
 
-function button_select(event) {
+
+function option_button_click(event) {
   let type = event.target.dataset.type;
   document.querySelectorAll('[data-type=' + type + ']').forEach(
     el => el.classList.remove('selected')
@@ -512,6 +548,7 @@ function button_select(event) {
   event.target.classList.add('selected');
   show_selected();
 }
+
 
 function move_scroll_top() {
   let el = document.getElementById('scroll_top');
@@ -521,6 +558,7 @@ function move_scroll_top() {
     el.style.display = 'block';
   }
 }
+
 
 function scroll_top() {
   if ('scrollBehavior' in document.documentElement.style) {
@@ -533,41 +571,64 @@ function scroll_top() {
   }
 }
 
+
 function clear_status_timeout() {
   if (STATE.status_timeout) {
     clearTimeout(STATE.status_timeout);
   }
 }
 
-function set_status_timeout() {
-  clear_status_timeout();
+function timeout_delay(last, max_delay, offline_check) {
   var now = new Date().getTime();
-  if (now - STATE.last_update >= UPDATE_INTERVAL_STATUS) {
+  if (now - last >= max_delay) {
     return 0;
   }
-  const interval = (STATE.offline ? OFF_LINE_CHECK : UPDATE_INTERVAL_STATUS);
-  let delay = interval - now % interval;
+
+  if (offline_check && STATE.offline) {
+    max_delay = OFF_LINE_CHECK;
+  }
+  let delay = max_delay - now % max_delay;
   if (delay < 5000) {
     delay = 5000
   }
+  return delay;
+}
+
+function set_status_timeout() {
+  clear_status_timeout();
+  const last = STATE.last_status_request_time;
+  let delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
   STATE.status_timeout = setTimeout(update_status, delay, true);
+}
+
+
+function set_stats_timeout() {
+  if (STATE.stats_timeout) {
+    clearTimeout(STATE.stats_timeout);
+  }
+  const last = STATE.last_stats_request_time;
+  let delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
+  STATE.stats_timeout = setTimeout(update_stats, delay, true);
 }
 
 
 function init() {
   scroll_top();
   update_status(true, true);
+  set_stats_timeout();
 }
+
 
 window.addEventListener('load', init);
 document.addEventListener('scroll', move_scroll_top);
+// FIXME do we need this?
 //window.addEventListener('resize', graph_resize);
 
 document.getElementById('scroll_top').addEventListener('click', scroll_top);
 document.getElementById('main_info').addEventListener('click', update_status);
 
 document.querySelectorAll('li').forEach(
-  el => el.addEventListener('click', button_select)
+  el => el.addEventListener('click', option_button_click)
 );
 
 document.onvisibilitychange = () => {
@@ -578,6 +639,21 @@ document.onvisibilitychange = () => {
   }
 };
 
+
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js', {'scope':'https://tollington.duckdns.org/'});
+  navigator.serviceWorker.register('/sw.js', {
+    'scope': 'https://tollington.duckdns.org/'
+  });
+}
+
+
+// FIXME unused
+
+function jlog(value) {
+  console.log(JSON.stringify(value, undefined, 4))
+}
+
+
+function random_int(max) {
+  return Math.floor(Math.random() * (Math.floor(max) + 1));
 }
