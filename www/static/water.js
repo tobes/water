@@ -595,7 +595,7 @@ function timeout_delay(last, max_delay, offline_check) {
   max_delay *= 1000;  // ms
   const now = Date.now();
   if (now - last >= max_delay) {
-    return 0;
+    return 1000;
   }
 
   if (offline_check && STATE.offline) {
