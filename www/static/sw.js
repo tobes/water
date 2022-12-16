@@ -29,6 +29,7 @@ RESOURCES = [
   "/static/img/android-chrome-192x192.png",
   "/static/site.webmanifest",
   "/status?fast",
+  "/status",
   "/stats"
 ]
 

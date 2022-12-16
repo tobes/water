@@ -24,8 +24,9 @@ def index():
 def service_worker():
     path = os.path.join(static_path, 'sw.js')
     response = make_response(open(path))
-    response.headers['Service-Worker-Allowed'] = 'https://tollington.duckdns.org/'
     response.headers['Content-Type'] = 'application/javascript; charset=UTF-8'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0'
+    response.headers['Service-Worker-Allowed'] = 'https://tollington.duckdns.org/'
     return response
 
 
