@@ -114,7 +114,7 @@ function update_status_display(data, automated) {
   set_element_text('temp', w.main.temp.toFixed(1));
   set_element_text('depth', sensor.depth);
   set_element_text('volume', sensor.volume);
-  set_element_text('pump_state', 'Pump ' + pump.pump_state);
+  set_element_text('pump_state', 'Pump ' + pump.state);
 
   const msg_time = data.message_time;
   set_element_text('message_time', datetime_format(msg_time, STATUS_TIME_OPTIONS));
