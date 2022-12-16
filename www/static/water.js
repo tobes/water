@@ -44,8 +44,8 @@ const TABLE_DATE_OPTIONS = {
 const STATE = {
   status_timeout: null,
   stats_timeout: null,
-  last_status_request_time: 0,
-  last_stats_request_time: 0,
+  status_last_data: null,
+  stats_last_data: null,
   status_due_time: null,
   stats_due_time: 0,
   data_cache: {},
@@ -110,7 +110,7 @@ function update_status_display(data, automated) {
   if (data === undefined){
 	  return;
   }
-
+  STATE.status_last_data = data.epoch_time * 1000;
   const w = data.weather.state;
   const pump = data['pump 1'];
   const sensor = data['sensor 1'];
@@ -168,7 +168,6 @@ function update_status(automated, first) {
 
   make_http_request('/status', update_status_display, automated);
 
-  STATE.last_status_request_time = Date.now();
   set_status_timeout();
   // see if stats need updating
   if (!STATE.offline){
@@ -180,7 +179,6 @@ function update_status(automated, first) {
 function update_stats() {
   // get stats
   make_http_request('/stats', update_stats_callback);
-  STATE.last_stats_request_time = Date.now();
   set_stats_timeout();
 }
 
@@ -501,6 +499,8 @@ function update_stats_callback(data) {
 	  return;
   }
 
+  STATE.stats_last_data = data.epoch_time * 1000;
+
   // process data
   data.data.forEach(row => {
     const name = row.name;
@@ -611,7 +611,7 @@ function timeout_delay(last, max_delay, offline_check) {
 
 function set_status_timeout() {
   clear_status_timeout();
-  const last = STATE.last_status_request_time;
+  const last = STATE.status_last_data;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
   if (STATE.status_due_time === null){
     STATE.status_due_time = Date.now() + delay;
@@ -624,7 +624,7 @@ function set_stats_timeout() {
   if (STATE.stats_timeout) {
     clearTimeout(STATE.stats_timeout);
   }
-  const last = STATE.last_stats_request_time;
+  const last = STATE.stats_last_data;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
   STATE.stats_due_time = Date.now() + delay;
   STATE.stats_timeout = setTimeout(update_stats, delay, true);
