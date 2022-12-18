@@ -50,7 +50,7 @@ const STATE = {
   stats_due_time: 0,
   data_cache: {},
   offline: true
-}
+};
 
 
 function datetime_format(datetime, format_options) {
@@ -107,8 +107,8 @@ function update_status_display(data, automated) {
   set_element_display('stale_status', stale);
   STATE.offline = Boolean(stale);
 
-  if (data === undefined){
-	  return;
+  if (data === undefined) {
+    return;
   }
   STATE.status_last_data = data.epoch_time * 1000;
   const w = data.weather.state;
@@ -146,7 +146,7 @@ function make_http_request(url, callback, payload) {
   xhr.onerror = () => {
     STATE.offline = true;
     callback();
-  }
+  };
   xhr.send();
 }
 
@@ -170,7 +170,7 @@ function update_status(automated, first) {
 
   set_status_timeout();
   // see if stats need updating
-  if (!STATE.offline){
+  if (!STATE.offline) {
     set_stats_timeout();
   }
 }
@@ -260,7 +260,7 @@ function show_selected() {
       break;
   }
 
-  const data_div = document.getElementById('data')
+  const data_div = document.getElementById('data');
   // remove existing stat
   data_div.childNodes.forEach(el => el.remove());
   // add new
@@ -310,7 +310,7 @@ function build_chart_data(scales, datasets) {
         }
       }
     }
-  }
+  };
 }
 
 
@@ -319,8 +319,8 @@ function create_axis(axis, cutoff, limits) {
   min_date.setHours(0, 0, 0, 0);
   min_date.setDate(min_date.getDate() + 1);
 
-  const max_date = new Date()
-  max_date.setHours(0, 0, 0, 0)
+  const max_date = new Date();
+  max_date.setHours(0, 0, 0, 0);
 
   // create axis
   const scales = {
@@ -332,7 +332,7 @@ function create_axis(axis, cutoff, limits) {
       min: min_date,
       max: max_date
     }
-  }
+  };
 
   // merge in our axis
   for (const key in axis) {
@@ -367,7 +367,7 @@ function create_axis(axis, cutoff, limits) {
 
 function create_graph(graph, cols, values, cutoff) {
   // get column index for each data
-  const col_index = {}
+  const col_index = {};
   for (let i = 0; i < cols.length; i++) {
     col_index[cols[i].title] = i;
   }
@@ -413,6 +413,7 @@ function create_graph(graph, cols, values, cutoff) {
   const chart_ = build_chart_data(axis, chart_data);
 
   const canvas = document.createElement('canvas');
+
   new Chart(canvas, chart_);
   return canvas;
 }
@@ -432,11 +433,11 @@ function graph_resize() {
   } else {
     size = Math.floor(w * ratio);
   }
-  size = Math.min(size, h)
+  size = Math.min(size, h);
 
   // graph container resizer triggers resize
   const el = document.querySelector('canvas');
-  if (el){
+  if (el) {
     el.parentNode.style.height = size + 'px';
   }
 }
@@ -475,10 +476,10 @@ function seconds_2_nice(seconds) {
 function stale_time(data, limit) {
 
   // check if our data is stale
-  if (data === undefined){
+  if (data === undefined) {
     return ' ';
   }
-  const difference = (Date.now() / 1000) - data.epoch_time ;
+  const difference = (Date.now() / 1000) - data.epoch_time;
   if (difference < limit) {
     return;
   }
@@ -494,7 +495,7 @@ function build_button(group, name) {
     button.dataset.value = name;
     button.innerText = name;
 
-    const button_group = document.getElementById(group)
+    const button_group = document.getElementById(group);
     // first button selected
     if (button_group.childNodes.length === 0) {
       button.classList.add('selected');
@@ -512,8 +513,8 @@ function update_stats_callback(data) {
   set_element_text('stale_stats_msg', 'Data ' + stale + ' old');
   set_element_display('stale_stats', stale);
 
-  if (data === undefined){
-	  return;
+  if (data === undefined) {
+    return;
   }
 
   STATE.stats_last_data = data.epoch_time * 1000;
@@ -609,7 +610,7 @@ function clear_status_timeout() {
 
 
 function timeout_delay(last, max_delay, offline_check) {
-  max_delay *= 1000;  // ms
+  max_delay *= 1000; // ms
   const now = Date.now();
   if (now - last >= max_delay) {
     return 1000;
@@ -620,7 +621,7 @@ function timeout_delay(last, max_delay, offline_check) {
   }
   let delay = max_delay - now % max_delay;
   if (delay < 5000) {
-    delay = 5000
+    delay = 5000;
   }
   return delay;
 }
@@ -630,7 +631,7 @@ function set_status_timeout() {
   clear_status_timeout();
   const last = STATE.status_last_data;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATUS, true);
-  if (STATE.status_due_time === null){
+  if (STATE.status_due_time === null) {
     STATE.status_due_time = Date.now() + delay;
   }
   STATE.status_timeout = setTimeout(update_status, delay, true);
@@ -686,7 +687,7 @@ document.onvisibilitychange = () => {
 // FIXME unused
 
 function jlog(value) {
-  console.log(JSON.stringify(value, undefined, 4))
+  console.log(JSON.stringify(value, undefined, 4));
 }
 
 
