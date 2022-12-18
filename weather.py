@@ -35,12 +35,13 @@ def get_summary(ts=None, days=-30):
         SELECT json, date(datestamp) FROM weather
         WHERE date(datestamp) >= ?
         ORDER BY date(datestamp)
-        LIMIT ?
     '''
     if ts == None:
         ts = util.timestamp_zeroed(days=days)
+
     out = []
-    with db.run_sql(sql, (ts, abs(days))) as result:
+
+    with db.run_sql(sql, (ts,)) as result:
         current_date = None
         rain = 0.0
         temp_min = None
