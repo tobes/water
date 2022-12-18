@@ -228,7 +228,7 @@ function show_selected() {
   const values = [];
   if (data) {
     data.values.forEach(row => {
-      if (yyyymmddToLocalDate(row[0]) > cutoff) {
+      if (display !== 'table' || yyyymmddToLocalDate(row[0]) > cutoff) {
         values.push(row);
       }
     });
@@ -314,8 +314,8 @@ function build_chart_data(scales, datasets) {
 }
 
 
-function create_axis(axis, cutoff) {
-  const min_date = new Date(cutoff)
+function create_axis(axis, cutoff, limits) {
+  const min_date = new Date(cutoff);
   min_date.setHours(0, 0, 0, 0);
   min_date.setDate(min_date.getDate() + 1);
 
@@ -338,6 +338,10 @@ function create_axis(axis, cutoff) {
   for (const key in axis) {
     if (!scales[key]) {
       scales[key] = {};
+    }
+    if (limits[key]) {
+      scales[key].suggestedMax = limits[key].max;
+      scales[key].suggestedMin = limits[key].min;
     }
     Object.assign(scales[key], axis[key]);
   }
@@ -370,6 +374,7 @@ function create_graph(graph, cols, values, cutoff) {
 
   // build datasets
   const chart_data = [];
+  const limits = {};
   for (const key in graph.dataset) {
     const dataset = {
       data: [],
@@ -381,6 +386,15 @@ function create_graph(graph, cols, values, cutoff) {
 
     // build chart data
     const index = col_index[key];
+    let max = 0;
+    let min = 0;
+    const yAxisID = dataset.yAxisID;
+    if (limits[yAxisID] === undefined) {
+      limits[yAxisID] = {
+        max: 0,
+        min: 0
+      };
+    }
     values.forEach(row => {
       // date is always first column in data
       const date = new Date(row[0]);
@@ -388,11 +402,14 @@ function create_graph(graph, cols, values, cutoff) {
         x: date,
         y: row[index]
       });
+      max = Math.max(row[index], max);
+      min = Math.min(row[index], min);
     });
-    chart_data.push(dataset)
+    limits[yAxisID].max = Math.max(limits[yAxisID].max, max);
+    limits[yAxisID].min = Math.min(limits[yAxisID].min, min);
+    chart_data.push(dataset);
   }
-
-  const axis = create_axis(graph.axis, cutoff);
+  const axis = create_axis(graph.axis, cutoff, limits);
   const chart_ = build_chart_data(axis, chart_data);
 
   const canvas = document.createElement('canvas');
