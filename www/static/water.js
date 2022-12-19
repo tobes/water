@@ -1,4 +1,3 @@
-/*jslint browser:true, esnext:true*/
 'use strict';
 
 const LOCALE = 'en-GB';
@@ -18,7 +17,7 @@ const STATS_DATE_OPTIONS = {
   month: 'long',
   day: 'numeric',
   hour: 'numeric',
-  minute: 'numeric',
+  minute: 'numeric'
 };
 
 const STATUS_DATE_OPTIONS = {
@@ -354,7 +353,7 @@ function create_axis(axis, cutoff, limits) {
         scales[key].ticks = {};
       }
       if (scales[key].tick_units === 'seconds') {
-        fn = (value, index, ticks) => display_seconds(value);
+        fn = display_seconds;
       } else {
         fn = (value, index, ticks) => value + scales[key].tick_units;
       }
@@ -395,7 +394,8 @@ function create_graph(graph, cols, values, cutoff) {
         min: 0
       };
     }
-    values.forEach(row => {
+    for (let i = 0; i < values.length; i++) {
+      let row = values[i];
       // date is always first column in data
       const date = new Date(row[0]);
       dataset.data.push({
@@ -404,7 +404,7 @@ function create_graph(graph, cols, values, cutoff) {
       });
       max = Math.max(row[index], max);
       min = Math.min(row[index], min);
-    });
+    }
     limits[yAxisID].max = Math.max(limits[yAxisID].max, max);
     limits[yAxisID].min = Math.min(limits[yAxisID].min, min);
     chart_data.push(dataset);
