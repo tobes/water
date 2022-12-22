@@ -84,6 +84,27 @@ def get_summary(ts=None, days=-30):
     return out
 
 
+def get_summary_hourly(ts):
+    sql = '''
+        SELECT json FROM weather
+        WHERE datestamp = ?
+    '''
+
+    out = {'datestamp': ts}
+    with db.run_sql(sql, (ts,)) as result:
+        for (json_data,) in result:
+            data = json.loads(json_data)
+            if 'rain' in data:
+                out['rain'] = data['rain']['1h']
+            else:
+                out['rain'] = 0
+            main = data['main']
+            out['temp'] = main['temp']
+            out['humidity'] = main['humidity']
+            out['pressure'] = main['pressure']
+    return out
+
+
 def get_last_period(days=-1, **td):
     td['days'] = days
     timestamp = util.timestamp(**td)

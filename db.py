@@ -53,9 +53,16 @@ sql_create = [
         temp_min REAL,
         temp_max REAL,
         rain REAL
-    )
-''',
-'''
+    ) ''',
+    '''
+    CREATE TABLE IF NOT EXISTS weather_summary_hourly(
+        datestamp,
+        temp REAL,
+        humidity REAL,
+        pressure REAL,
+        rain REAL
+    ) ''',
+    '''
     CREATE TABLE IF NOT EXISTS auto(
         datestamp,
         duration INT
@@ -190,6 +197,34 @@ def update_weather():
     return output
 
 
+def update_weather_hourly():
+
+    import weather
+
+    sql = '''
+        SELECT DISTINCT w.datestamp
+        FROM weather w
+        LEFT JOIN weather_summary_hourly wsh ON w.datestamp = wsh.datestamp
+        WHERE wsh.datestamp IS NULL
+        ORDER BY w.datestamp
+    '''
+
+    updates = []
+    output = []
+
+    with run_sql(sql) as result:
+        for row in result:
+            updates.append(row[0])
+
+    for update in updates:
+        print('wsh', update)
+        summary = weather.get_summary_hourly(ts=update)
+        if summary:
+            print('update weather for', update)
+            save_data('weather_summary_hourly', **summary)
+    return output
+
+
 @contextmanager
 def run_sql(sql, data=None, row_factory=False):
     con = sqlite3.connect(config.SQLITE_DB)
@@ -219,6 +254,37 @@ def update_recent_levels():
 def update_recent_weather():
     execute_sql('DELETE FROM weather_summary AS ws WHERE ws.date >= date("now","-1 day")')
     return update_weather()
+
+
+def update_recent_weather_hourly():
+    execute_sql(
+        'DELETE FROM weather_summary_hourly AS wsh WHERE wsh.datestamp >= date("now","-1 day")'
+    )
+    return update_weather_hourly()
+
+
+def clean_timestamps():
+    TABLE = "weather"
+    PERIOD = config.WEATHER_INTERVAL // 60
+   # TS = {'hours': -1}
+    TS = {}
+
+
+    import util
+    from datetime import datetime
+    sql= 'SELECT datestamp FROM ' + TABLE +' WHERE datestamp > "2022-12-19 19:00:00"'
+    timestamps = []
+    with run_sql(sql) as result:
+        for (timestamp, ) in result:
+            timestamps.append(timestamp)
+
+    for timestamp in timestamps:
+        ts = datetime.fromisoformat(timestamp)
+        new_ts = util.timestamp_clean(ts, period=PERIOD, **TS)
+        if timestamp != new_ts:
+            print('%r %r'%(timestamp,new_ts))
+         #   sql= 'UPDATE ' + TABLE + ' SET datestamp=? WHERE datestamp=?'
+         #   execute_sql(sql, (new_ts, timestamp))
 
 
 if __name__ == '__main__':

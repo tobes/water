@@ -33,6 +33,28 @@ def timestamp_zeroed(**td):
 
 
 
+def timestamp_clean(timestamp=None, period=1, **td):
+    """
+    return datetime in ISO format without microseconds.
+    always at 00:00:00
+
+    **td can give a timedelta offset  eg days=1
+
+    """
+    if timestamp is None:
+        timestamp = datetime.now()
+    td = timedelta(**td)
+    timestamp += td
+    replace = {
+        'second': 0,
+        'microsecond': 0,
+    }
+    replace['minute'] = int(period * int(float(timestamp.minute)/period))
+    timestamp = timestamp.replace(**replace)
+    return timestamp.isoformat(sep=' ')
+
+
+
 def thread_runner(function, interval=None, seconds=None, kwargs=None):
     """ spawn a thread to run function at interval """
     if interval:

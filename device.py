@@ -89,12 +89,14 @@ class Weather:
             content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
 
             self.state = json.loads(content)
-            self.update_time = util.timestamp()
+            # create timestamp for start of the period (1 hour)
+            timestamp = util.timestamp_clean(period=60, hours=-1)
+            self.update_time = timestamp
             if save:
                 db.save_data(
                     'weather',
                     json=content,
-                    datestamp=util.timestamp()
+                    datestamp=timestamp,
                 )
                 # update summary table
                 db.update_recent_weather()
@@ -277,7 +279,7 @@ class Meter:
                     self.distance = int(sum(ticks) / len(ticks) * 0.1715)
                     self.distance2 = int(statistics.geometric_mean(self.ticks) * 0.1715)
                     self.accuracy = round(statistics.pstdev(self.ticks), 2)
-                    self.update_time = util.timestamp()
+                    self.update_time = util.timestamp_clean(period=5)
                     self.done = True
                     if self.save:
                         db.save_data(
