@@ -207,8 +207,6 @@ def update_levels():
 
 def update_weather():
 
-    import weather
-
     sql = '''
         SELECT date(datestamp) as date,
         max(wsh.temp_max) as temp_max,
@@ -243,24 +241,11 @@ def update_weather_hourly():
         ORDER BY w.datestamp
     '''
 
-    output = []
-
     for datestamp, json_data in sql_select(sql):
         print('update weather_summary_hourly', datestamp)
-        data = json.loads(json_data)
-        rain = data.get('rain', {}).get('1h', 0)
-        main = data.get('main', {})
-        info = {
-            'datestamp': datestamp,
-            'temp': main.get('temp'),
-            'temp_min': main.get('temp_min'),
-            'temp_max': main.get('temp_max'),
-            'humidity': main.get('humidity'),
-            'pressure': main.get('pressure'),
-            'rain': rain,
-        }
+        info = weather.weather_json_2_dict(json_data)
+        info['datestamp'] = datestamp
         save_or_update_data('weather_summary_hourly', ('datestamp',), info)
-    return output
 
 
 def update_recent_levels():
