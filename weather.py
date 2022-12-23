@@ -8,28 +8,6 @@ import config
 import util
 
 
-def get_weather(save=False):
-    query_data = {
-        'lat': config.LAT,
-        'lon': config.LON,
-        'appid': config.WEATHER_API_KEY,
-        'units': 'metric',
-    }
-
-    query_string = urlencode(query_data)
-    content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
-
-    if save:
-        db.save_data(
-            'weather',
-            json=content,
-            date=util.timestamp()
-        )
-        db.update_recent_weather()
-    return content
-
-
-
 def get_summary(ts=None, days=-30):
     sql = '''
         SELECT json, date(datestamp) FROM weather
