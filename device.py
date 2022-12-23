@@ -209,7 +209,7 @@ class Relay:
                     SELECT datestamp FROM pumps WHERE action="ON"
                     ORDER BY datestamp DESC LIMIT 1
                 '''
-                with db.run_sql(sql, row_factory=True) as result:
+                with db.sql_run(sql, row_factory=True) as result:
                     datestamp = result.fetchone()['datestamp']
                     d1 = datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
                     days = 1 + (datetime.now() - d1).days

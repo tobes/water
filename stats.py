@@ -7,7 +7,7 @@ import db
 
 def sql_query_2_json(sql=None, values=None, cols=None, graph=None, process=None):
     if sql:
-        with db.run_sql(sql, row_factory=True) as result:
+        with db.sql_run(sql, row_factory=True) as result:
             values = list(map(list, result.fetchall()))
     if process:
         values = process(values)

@@ -136,11 +136,11 @@ def update_levels_for_date(date, sensor):
             accuracy=accuracy,
         )
 
-    with run_sql(sql_max_accurracy, (date, sensor)) as result:
+    with sql_run(sql_max_accurracy, (date, sensor)) as result:
         for row in result:
             max_accuracy = row[0]
 
-    with run_sql(sql_accurate, (max_accuracy, max_accuracy, date, sensor)) as result:
+    with sql_run(sql_accurate, (max_accuracy, max_accuracy, date, sensor)) as result:
         for row in result:
             record = level_record(row, date=date, sensor=sensor, accuracy=0)
             save_data('level_summary', **record)
@@ -226,7 +226,7 @@ def update_weather_hourly():
 
 
 @contextmanager
-def run_sql(sql, data=None, row_factory=False):
+def sql_run(sql, data=None, row_factory=False):
     con = sqlite3.connect(config.SQLITE_DB)
     if row_factory:
         con.row_factory = sqlite3.Row
@@ -239,25 +239,25 @@ def run_sql(sql, data=None, row_factory=False):
     con.close()
 
 
-def execute_sql(sql, data=None):
-    con = sqlite3.connect(config.SQLITE_DB)
-    con.execute(sql, data or tuple())
-    con.commit()
-    con.close()
+def sql_execute(sql, data=None):
+    with sqlite3.connect(config.SQLITE_DB) as con:
+        con.execute(sql, data or tuple())
+
+
 
 
 def update_recent_levels():
-    execute_sql('DELETE FROM level_summary AS ls WHERE ls.date >= date("now","-1 day")')
+    sql_execute('DELETE FROM level_summary AS ls WHERE ls.date >= date("now","-5 day")')
     update_levels()
 
 
 def update_recent_weather():
-    execute_sql('DELETE FROM weather_summary AS ws WHERE ws.date >= date("now","-1 day")')
+    sql_execute('DELETE FROM weather_summary AS ws WHERE ws.date >= date("now","-1 day")')
     return update_weather()
 
 
 def update_recent_weather_hourly():
-    execute_sql(
+    sql_execute(
         'DELETE FROM weather_summary_hourly AS wsh WHERE wsh.datestamp >= date("now","-1 day")'
     )
     return update_weather_hourly()
@@ -274,7 +274,7 @@ def clean_timestamps():
     from datetime import datetime
     sql= 'SELECT datestamp FROM ' + TABLE +' WHERE datestamp > "2022-12-19 19:00:00"'
     timestamps = []
-    with run_sql(sql) as result:
+    with sql_run(sql) as result:
         for (timestamp, ) in result:
             timestamps.append(timestamp)
 
@@ -284,7 +284,7 @@ def clean_timestamps():
         if timestamp != new_ts:
             print('%r %r'%(timestamp,new_ts))
          #   sql= 'UPDATE ' + TABLE + ' SET datestamp=? WHERE datestamp=?'
-         #   execute_sql(sql, (new_ts, timestamp))
+         #   sql_execute(sql, (new_ts, timestamp))
 
 
 if __name__ == '__main__':

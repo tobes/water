@@ -19,7 +19,7 @@ def get_summary(ts=None, days=-30):
 
     out = []
 
-    with db.run_sql(sql, (ts,)) as result:
+    with db.sql_run(sql, (ts,)) as result:
         current_date = None
         rain = 0.0
         temp_min = None
@@ -69,7 +69,7 @@ def get_summary_hourly(ts):
     '''
 
     out = {'datestamp': ts}
-    with db.run_sql(sql, (ts,)) as result:
+    with db.sql_run(sql, (ts,)) as result:
         for (json_data,) in result:
             data = json.loads(json_data)
             if 'rain' in data:
@@ -87,7 +87,7 @@ def get_last_period(days=-1, **td):
     td['days'] = days
     timestamp = util.timestamp(**td)
     sql = 'SELECT json, date(datestamp) FROM weather WHERE datestamp >= ?'
-    with db.run_sql(sql, (timestamp,)) as result:
+    with db.sql_run(sql, (timestamp,)) as result:
         current_date = None
         rain = 0.0
         temp_min = None
