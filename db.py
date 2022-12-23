@@ -49,15 +49,17 @@ sql_create = [
 
 '''
     CREATE TABLE IF NOT EXISTS weather_summary(
-        date,
+        date PRIMARY KEY,
         temp_min REAL,
         temp_max REAL,
         rain REAL
     ) ''',
     '''
     CREATE TABLE IF NOT EXISTS weather_summary_hourly(
-        datestamp,
+        datestamp PRIMARY KEY,
         temp REAL,
+        temp_min REAL,
+        temp_max REAL,
         humidity REAL,
         pressure REAL,
         rain REAL
@@ -89,6 +91,27 @@ def save_data(table, **kw):
     with con:
         con.execute(sql, tuple(v for v in kw.values()))
     con.close()
+
+
+def save_or_update_data(table, primary_key, data):
+    if isinstance(data, sqlite3.Row):
+        data = dict(data)
+    insert_columns = ['%r' % k for k in data]
+    update_columns = [k for k in data if k not in primary_key]
+    update_set = ['%r=excluded.%r' % (k, k) for k in update_columns]
+
+    sql = 'INSERT INTO %r (' % table
+    sql += ', '.join(insert_columns)
+    sql += ') VALUES ('
+    sql += ', '.join(['?' for k in data])
+    sql += ')'
+    sql += ' ON CONFLICT('
+    sql += ', '.join(primary_key)
+    sql += ')'
+    sql += ' DO UPDATE SET '
+    sql += ', '.join(update_set)
+
+    sql_execute(sql, tuple(v for v in data.values()))
 
 
 def update_levels_for_date(date, sensor):
@@ -149,23 +172,16 @@ def update_levels_for_date(date, sensor):
 
 def update_levels():
     sql = '''
-        SELECT DISTINCT l.sensor, date(datestamp) as date
+        SELECT DISTINCT date(datestamp) as date, l.sensor
         FROM levels l
-        LEFT JOIN level_summary ls ON date(l.datestamp) = ls.date
+        LEFT JOIN level_summary ls
+        ON date(l.datestamp) = ls.date
         WHERE ls.date IS NULL
         ORDER BY date(datestamp)
     '''
 
-    updates = []
-
-    with run_sql(sql) as result:
-        for row in result:
-            sensor = row[0]
-            date = row[1]
-            updates.append([date, sensor])
-
-    for update in updates:
-        print('update levels for', updates[0])
+    for update in sql_select(sql):
+        print('update levels for', update[0])
         update_levels_for_date(*update)
 
 
@@ -174,54 +190,56 @@ def update_weather():
     import weather
 
     sql = '''
-        SELECT DISTINCT date(datestamp) as date
-        FROM weather w
-        LEFT JOIN weather_summary ws ON date(w.datestamp) = ws.date
+        SELECT date(datestamp) as date,
+        max(wsh.temp_max) as temp_max,
+        min(wsh.temp_min) as temp_min,
+        sum(wsh.rain) as rain
+
+        FROM weather_summary_hourly wsh
+        LEFT JOIN weather_summary ws
+        ON date(wsh.datestamp) = ws.date
+
         WHERE ws.date IS NULL
+        GROUP BY date(datestamp)
         ORDER BY date(datestamp)
     '''
 
-    updates = []
-    output = []
-
-    with run_sql(sql) as result:
-        for row in result:
-            updates.append(row[0])
-
-    for update in updates:
-        summary = weather.get_summary(ts=update, days=1)
-        if summary:
-            output.append(summary[0])
-            print('update weather for', summary[0]['date'])
-            save_data('weather_summary', **summary[0])
-    return output
+    for update in sql_select(sql, row_factory=True):
+        print('update weather_summary for', update['date'])
+        save_or_update_data('weather_summary', ('date',), update)
 
 
 def update_weather_hourly():
 
     import weather
+    import json
 
     sql = '''
-        SELECT DISTINCT w.datestamp
+        SELECT DISTINCT w.datestamp, w.json
         FROM weather w
-        LEFT JOIN weather_summary_hourly wsh ON w.datestamp = wsh.datestamp
+        LEFT JOIN weather_summary_hourly wsh
+        ON w.datestamp = wsh.datestamp
         WHERE wsh.datestamp IS NULL
         ORDER BY w.datestamp
     '''
 
-    updates = []
     output = []
 
-    with run_sql(sql) as result:
-        for row in result:
-            updates.append(row[0])
-
-    for update in updates:
-        print('wsh', update)
-        summary = weather.get_summary_hourly(ts=update)
-        if summary:
-            print('update weather for', update)
-            save_data('weather_summary_hourly', **summary)
+    for datestamp, json_data in sql_select(sql):
+        print('update weather_summary_hourly', datestamp)
+        data = json.loads(json_data)
+        rain = data.get('rain', {}).get('1h', 0)
+        main = data.get('main', {})
+        info = {
+            'datestamp': datestamp,
+            'temp': main.get('temp'),
+            'temp_min': main.get('temp_min'),
+            'temp_max': main.get('temp_max'),
+            'humidity': main.get('humidity'),
+            'pressure': main.get('pressure'),
+            'rain': rain,
+        }
+        save_or_update_data('weather_summary_hourly', ('datestamp',), info)
     return output
 
 
@@ -244,6 +262,12 @@ def sql_execute(sql, data=None):
         con.execute(sql, data or tuple())
 
 
+def sql_select(sql, data=None, row_factory=False):
+    with sqlite3.connect(config.SQLITE_DB) as con:
+        if row_factory:
+            con.row_factory = sqlite3.Row
+        output = list(con.execute(sql, data or tuple()))
+    return output
 
 
 def update_recent_levels():
