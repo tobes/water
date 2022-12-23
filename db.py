@@ -72,13 +72,33 @@ sql_create = [
 ''',
 ]
 
-con = sqlite3.connect(config.SQLITE_DB)
 
-for sql in sql_create:
+
+@contextmanager
+def sql_run(sql, data=None, row_factory=False):
+    con = sqlite3.connect(config.SQLITE_DB)
+    if row_factory:
+        con.row_factory = sqlite3.Row
     with con:
-        con.execute(sql)
+        result = con.execute(sql, data or tuple())
+        try:
+            yield result
+        finally:
+            pass
+    con.close()
 
-con.close()
+
+def sql_execute(sql, data=None):
+    with sqlite3.connect(config.SQLITE_DB) as con:
+        con.execute(sql, data or tuple())
+
+
+def sql_select(sql, data=None, row_factory=False):
+    with sqlite3.connect(config.SQLITE_DB) as con:
+        if row_factory:
+            con.row_factory = sqlite3.Row
+        output = list(con.execute(sql, data or tuple()))
+    return output
 
 
 def save_data(table, **kw):
@@ -243,33 +263,6 @@ def update_weather_hourly():
     return output
 
 
-@contextmanager
-def sql_run(sql, data=None, row_factory=False):
-    con = sqlite3.connect(config.SQLITE_DB)
-    if row_factory:
-        con.row_factory = sqlite3.Row
-    with con:
-        result = con.execute(sql, data or tuple())
-        try:
-            yield result
-        finally:
-            pass
-    con.close()
-
-
-def sql_execute(sql, data=None):
-    with sqlite3.connect(config.SQLITE_DB) as con:
-        con.execute(sql, data or tuple())
-
-
-def sql_select(sql, data=None, row_factory=False):
-    with sqlite3.connect(config.SQLITE_DB) as con:
-        if row_factory:
-            con.row_factory = sqlite3.Row
-        output = list(con.execute(sql, data or tuple()))
-    return output
-
-
 def update_recent_levels():
     sql_execute('DELETE FROM level_summary AS ls WHERE ls.date >= date("now","-5 day")')
     update_levels()
@@ -309,6 +302,11 @@ def clean_timestamps():
             print('%r %r'%(timestamp,new_ts))
          #   sql= 'UPDATE ' + TABLE + ' SET datestamp=? WHERE datestamp=?'
          #   sql_execute(sql, (new_ts, timestamp))
+
+
+# Initiate tables
+for sql in sql_create:
+    sql_execute(sql)
 
 
 if __name__ == '__main__':
