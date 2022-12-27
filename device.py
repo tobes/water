@@ -18,6 +18,7 @@ import config
 import util
 import weather
 
+HAVE_PIGPIO = False
 
 
 if pigpio:
@@ -32,6 +33,7 @@ if pigpio:
         print('pigpio started')
 
     p = pigpio.pi()
+    HAVE_PIGPIO = True
 else:
     # allow running without pigpio for development reasons
     class Null:
@@ -303,6 +305,8 @@ class Meter:
         self.get_distance()
 
     def get_distance(self, save=False):
+        if HAVE_PIGPIO is False:
+            return
         time_since_update = time.time() - (self.last_update_time or 0)
         if save is False and time_since_update  < config.METER_CHECK_INTERVAL:
             return
