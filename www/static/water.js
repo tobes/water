@@ -129,6 +129,7 @@ function update_status_display(data, automated) {
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
   set_element_display('loading', false);
   set_element_display('main_info', true);
+  set_status_timeout();
 }
 
 
@@ -166,19 +167,12 @@ function update_status(automated, first) {
   }
 
   make_http_request('/status', update_status_display, automated);
-
-  set_status_timeout();
-  // see if stats need updating
-  if (!STATE.offline) {
-    set_stats_timeout();
-  }
 }
 
 
 function update_stats() {
   // get stats
   make_http_request('/stats', update_stats_callback);
-  set_stats_timeout();
 }
 
 
@@ -532,6 +526,7 @@ function update_stats_callback(data) {
   const message_time = datetime_format(Date(), STATS_DATE_OPTIONS);
   set_element_text('data_update_time', 'Updated: ' + message_time);
   show_selected();
+  set_stats_timeout();
 }
 
 
@@ -638,10 +633,14 @@ function set_status_timeout() {
 }
 
 
-function set_stats_timeout() {
+function clear_stats_timeout() {
   if (STATE.stats_timeout) {
     clearTimeout(STATE.stats_timeout);
   }
+}
+
+function set_stats_timeout() {
+  clear_stats_timeout()
   const last = STATE.stats_last_data;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
   STATE.stats_due_time = Date.now() + delay;
@@ -659,28 +658,29 @@ function init() {
   }
 
   update_status(true);
+  update_stats();
+
+  document.addEventListener('scroll', move_scroll_top);
+  document.getElementById('scroll_top').addEventListener('click', scroll_top);
+  document.getElementById('main_info').addEventListener('click', update_status);
+  document.getElementById('data_update_time').addEventListener('click', update_stats);
+  document.querySelectorAll('li').forEach(
+    el => el.addEventListener('click', option_button_click)
+  );
+
+  document.onvisibilitychange = () => {
+    if (document.visibilityState === 'hidden') {
+      clear_status_timeout();
+      clear_stats_timeout();
+    } else {
+      set_status_timeout();
+      set_stats_timeout();
+    }
+  };
 }
 
 
 window.addEventListener('load', init);
-document.addEventListener('scroll', move_scroll_top);
-// FIXME do we need this?
-//window.addEventListener('resize', graph_resize);
-
-document.getElementById('scroll_top').addEventListener('click', scroll_top);
-document.getElementById('main_info').addEventListener('click', update_status);
-
-document.querySelectorAll('li').forEach(
-  el => el.addEventListener('click', option_button_click)
-);
-
-document.onvisibilitychange = () => {
-  if (document.visibilityState === 'hidden') {
-    clear_status_timeout();
-  } else {
-    set_status_timeout();
-  }
-};
 
 
 
