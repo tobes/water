@@ -93,11 +93,16 @@ def sql_execute(sql, data=None):
         con.execute(sql, data or tuple())
 
 
-def sql_select(sql, data=None, row_factory=False):
+def sql_select(sql, data=None, row_factory=False, as_dict=False, as_lists=False):
     with sqlite3.connect(config.SQLITE_DB) as con:
-        if row_factory:
+        if row_factory or as_dict:
             con.row_factory = sqlite3.Row
-        output = list(con.execute(sql, data or tuple()))
+        if as_dict:
+            output = list(map(dict, con.execute(sql, data or tuple())))
+        elif as_lists:
+            output = list(map(list, con.execute(sql, data or tuple())))
+        else:
+            output = list(con.execute(sql, data or tuple()))
     return output
 
 
