@@ -303,3 +303,8 @@ class Meter:
             'accuracy': self.accuracy,
             'update_time': self.update_time,
         }
+
+if __name__ == '__main__':
+
+    d = Meter(id=2, gpio_trigger=8, gpio_echo=25, butt=Butt())
+    print(d.status())
