@@ -30,34 +30,31 @@ div {
   font-size: .75em;
   padding: .2em 1em;
   display: inline-block;
-  color: #fff;
+  color: #333;
 }
 
 #accuracy.excellent {
-  background-color: green;
+  background-color: #39c121;
 }
 
 #accuracy.good {
-  background-color: blue;
+  background-color: #7bc927;
 }
 
 #accuracy.adaquate {
-  background-color: lightblue;
-  color: #000;
+  background-color: #e8e648;
 }
 
 #accuracy.poor {
-  background-color: orange;
-  color: #666;
+  background-color: #efb338;
 }
 
 #accuracy.awful {
-  background-color: red;
+  background-color: #e82e2e;
 }
 
 #accuracy.updating {
   background-color: #ddd;
-  color: #000;
 }
 
 .offline,
@@ -169,6 +166,7 @@ canvas {
 #scroll_top {
   color: #fff;
   background-color: #009879;
+  border: 2px solid #fff;
   position: fixed;
   width: 3em;
   height: 3em;
