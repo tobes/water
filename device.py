@@ -209,7 +209,7 @@ class Relay:
 
 class Meter:
 
-    def __init__(self, gpio_trigger, gpio_echo, **kw):
+    def __init__(self, id, gpio_trigger, gpio_echo, **kw):
         self.gpio_trigger = gpio_trigger
         self.gpio_echo = gpio_echo
         self.butt = Butt()
@@ -224,6 +224,7 @@ class Meter:
         self.ticks = []
         self.save=False
         self.thread = None
+        self.id = id
 
         p.set_mode(gpio_trigger, pigpio.OUTPUT)
         p.write(gpio_trigger, 0)
@@ -253,7 +254,7 @@ class Meter:
                     if self.save:
                         db.save_data(
                             'levels',
-                            sensor=1,
+                            sensor=id,
                             datestamp=self.update_time,
                             level=self.distance,
                             level2=self.distance2,
