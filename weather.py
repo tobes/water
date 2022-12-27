@@ -8,26 +8,6 @@ import config
 import util
 
 
-##def get_weather(save=False):
-##    query_data = {
-##        'lat': config.LAT,
-##        'lon': config.LON,
-##        'appid': config.WEATHER_API_KEY,
-##        'units': 'metric',
-##    }
-##
-##    query_string = urlencode(query_data)
-##    content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
-##
-##    if save:
-##        db.save_data(
-##            'weather',
-##            json=content,
-##            date=util.timestamp()
-##        )
-##        db.update_recent_weather()
-##    return content
-
 
 def weather_json_2_dict(json_data):
     """
@@ -101,27 +81,6 @@ def get_summary(ts=None, days=-30):
     return out
 
 
-def get_summary_hourly(ts):
-    sql = '''
-        SELECT json FROM weather
-        WHERE datestamp = ?
-    '''
-
-    out = {'datestamp': ts}
-    with db.sql_run(sql, (ts,)) as result:
-        for (json_data,) in result:
-            data = json.loads(json_data)
-            if 'rain' in data:
-                out['rain'] = data['rain']['1h']
-            else:
-                out['rain'] = 0
-            main = data['main']
-            out['temp'] = main['temp']
-            out['humidity'] = main['humidity']
-            out['pressure'] = main['pressure']
-    return out
-
-
 def get_last_period(days=-1, **td):
     td['days'] = days
     timestamp = util.timestamp(**td)
@@ -153,7 +112,53 @@ def get_last_period(days=-1, **td):
         }
 
 
-if __name__ == '__main__':
-    print(get_last_period())
-    print(get_summary())
-    print(get_weather())
+def past_weather(timestamp=None):
+    sql = '''
+    SELECT CAST((JULIANDAY(:ts) - JULIANDAY(datestamp)) as INT) AS day,
+    MAX(temp_max) as temp_max,
+    MIN(temp_min) as temp_min,
+    SUM(rain) as rain
+    FROM weather_summary_hourly
+    GROUP BY day
+    HAVING day >=0 and day < 10
+    ORDER BY day;
+    '''
+    ts = util.timestamp_clean(timestamp=timestamp, period=60, hours=-1)
+    print('past_weather for', ts)
+    return db.sql_select(sql, {'ts':ts}, as_dict=True)
+
+
+def auto_estimate(timestamp=None):
+    recent = past_weather(timestamp)
+    # ignore if no data for the day
+    if len(recent) == 0 or recent[0]['day'] != 0:
+        return 0
+    today = recent[0]
+    # check we meet the minimum temperatures
+    if (
+            today['temp_max'] < config.AUTO_MIN_TEMP_MAX or
+            today['temp_min'] < config.AUTO_MIN_TEMP_MIN
+    ):
+        return 0
+
+    rain = 0
+    for data in reversed(recent):
+        # each day we reduce the effective rain
+        rain = max(0, rain - config.AUTO_IGNORED_WATER_PER_DAY)
+        # add the rain for that day
+        rain += data['rain']
+    if rain <= config.AUTO_MIN_RAIN:
+        rain = 0
+
+    degrees = today['temp_max'] - config.AUTO_MIN_TEMP_MAX
+    duration = (config.AUTO_SECONDS_PER_DEGREE * degrees)
+    duration -= config.AUTO_SECONDS_PER_MM_RAIN * rain
+
+    if duration < 0:
+        duration = 0
+
+    duration -= duration % 5
+    if duration > 0:
+        duration = max(duration, config.AUTO_MIN_SECONDS)
+        duration = min(duration, config.AUTO_MAX_SECONDS)
+    return duration
