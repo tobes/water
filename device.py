@@ -242,7 +242,7 @@ class Relay:
 
 class Meter:
 
-    def __init__(self, gpio_trigger, gpio_echo, butt, **kw):
+    def __init__(self, gpio_trigger, gpio_echo, **kw):
         self.gpio_trigger = gpio_trigger
         self.gpio_echo = gpio_echo
         self.butt = Butt()

@@ -235,7 +235,6 @@ def update_weather():
 def update_weather_hourly():
 
     import weather
-    import json
 
     sql = '''
         SELECT DISTINCT w.datestamp, w.json
@@ -301,4 +300,5 @@ for sql in sql_create:
 
 if __name__ == '__main__':
     update_recent_levels()
+    update_recent_weather_hourly()
     update_recent_weather()
