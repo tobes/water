@@ -1,30 +1,27 @@
 import time
 
+from datetime import datetime, timedelta
+
 from flask import make_response
 
 import db
+import weather
 
-
-def sql_query_2_json(sql=None, values=None, cols=None, graph=None, process=None):
-    if sql:
-        with db.sql_run(sql, row_factory=True) as result:
-            values = list(map(list, result.fetchall()))
-    if process:
-        values = process(values)
-    output = {
-        'cols': cols,
-        'values': values,
-        'graph':graph,
-    }
-    return output
+from config import STATS_MAX_DAYS
 
 
 def stats_depths():
     sql = '''
         SELECT date, min_depth, max_depth, last_depth
         FROM level_summary
+        WHERE date > date('now', :offset)
         ORDER BY date DESC;
     '''
+
+    params = {'offset': "-%s day" % STATS_MAX_DAYS}
+
+    values = db.sql_select(sql, params)
+
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'min', 'type':'int', 'units': 'mm'},
@@ -61,15 +58,27 @@ def stats_depths():
             },
         },
     }
-    return sql_query_2_json(sql=sql, cols=cols, graph=graph)
+
+    output = {
+        'cols': cols,
+        'values': values,
+        'graph':graph,
+    }
+    return output
 
 
 def stats_volumes():
     sql = '''
         SELECT date, min_volume, max_volume, last_volume
         FROM level_summary
+        WHERE date > date('now', :offset)
         ORDER BY date DESC;
     '''
+
+    params = {'offset': "-%s day" % STATS_MAX_DAYS}
+
+    values = db.sql_select(sql, params)
+
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'min', 'type':'float', 'units': 'litres'},
@@ -106,15 +115,28 @@ def stats_volumes():
             },
         },
     }
-    return sql_query_2_json(sql=sql, cols=cols, graph=graph)
+
+    output = {
+        'cols': cols,
+        'values': values,
+        'graph':graph,
+    }
+    return output
 
 
 def stats_auto():
-    sql = '''
-        SELECT date(datestamp) date, time(datestamp) as time, duration
-        FROM auto
-        ORDER BY datestamp DESC;
-    '''
+
+    values = []
+    utc = datetime.utcnow()
+    dt = utc.replace(hour=19) - timedelta(days=STATS_MAX_DAYS)
+    one_day = timedelta(days=1)
+    while dt < utc:
+        date = dt.strftime('%Y-%m-%d')
+        time = dt.strftime('%H:%M')
+        auto = weather.auto_estimate(dt)
+        values.append([date, time, auto])
+        dt += one_day
+
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'time', 'type':'time'},
@@ -142,15 +164,29 @@ def stats_auto():
             },
         },
     }
-    return sql_query_2_json(sql=sql, cols=cols, graph=graph)
+
+    output = {
+        'cols': cols,
+        'values': values,
+        'graph':graph,
+    }
+    return output
 
 
 def stats_pump():
     sql = '''
-        SELECT date(datestamp) as date, pump,time(datestamp) as time, duration FROM pumps
+        SELECT date(datestamp) as date,
+        pump, time(datestamp) as time, duration
+        FROM pumps
         WHERE action = 'ON'
+        AND date(datestamp) > date('now', :offset)
         ORDER BY datestamp DESC;
     '''
+
+    params = {'offset': "-%s day" % STATS_MAX_DAYS}
+
+    values = db.sql_select(sql, params)
+
     cols = [
        {'title': 'date', 'type':'date'},
        {'title': 'pump', 'type':'str'},
@@ -179,15 +215,26 @@ def stats_pump():
             },
         },
     }
-    return sql_query_2_json(sql=sql, cols=cols, graph=graph)
+
+    output = {
+        'cols': cols,
+        'values': values,
+        'graph':graph,
+    }
+    return output
 
 
 def stats_weather():
     sql = '''
         SELECT date, temp_min, temp_max, rain
         FROM weather_summary
+        WHERE date > date('now', :offset)
         ORDER BY date DESC
     '''
+
+    params = {'offset': "-%s day" % (STATS_MAX_DAYS + 1)}
+
+    values = db.sql_select(sql, params)
 
     cols = [
        {'title': 'date', 'type':'date'},
@@ -240,7 +287,12 @@ def stats_weather():
         },
     }
 
-    return sql_query_2_json(sql=sql, cols=cols, graph=graph)
+    output = {
+        'cols': cols,
+        'values': values,
+        'graph':graph,
+    }
+    return output
 
 
 def get_stats():
