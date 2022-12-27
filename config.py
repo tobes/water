@@ -33,6 +33,6 @@ AUTO_IGNORED_WATER_PER_DAY = 5 # ignore this much water per day since rain
 
 
 AUTO_HOUR = 19
-AUTO_MINUTE = 0
+AUTO_MINUTE = 5
 
 STATS_MAX_DAYS = 90

@@ -4,7 +4,6 @@ import subprocess
 from flask import Flask, make_response, render_template, request
 
 import db
-from weather import get_summary
 from device import Butt
 from stats import get_stats
 

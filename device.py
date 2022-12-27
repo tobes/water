@@ -196,48 +196,15 @@ class Relay:
         delay = (wanted - now).total_seconds()
         util.thread_runner(self.auto, seconds=delay, kwargs={'action': True})
 
-        w = weather.get_last_period()
-        # if we have no weather info don't process
-        if  action and w['temp_max'] is not None:
-            # Check minimum temperatures
-            if (
-                    w['temp_max'] < config.AUTO_MIN_TEMP_MAX or
-                    w['temp_min'] < config.AUTO_MIN_TEMP_MIN
-            ):
-                duration = 0
-                print('cold')
-            else:
-                sql = '''
-                    SELECT datestamp FROM pumps WHERE action="ON"
-                    ORDER BY datestamp DESC LIMIT 1
-                '''
-                with db.sql_run(sql, row_factory=True) as result:
-                    datestamp = result.fetchone()['datestamp']
-                    d1 = datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
-                    days = 1 + (datetime.now() - d1).days
-               # datestamp = '2022-10-21'
-                weather_summary = weather.get_summary(ts=datestamp)
-                rain = 0
-                for v in weather_summary:
-                    # each day we reduce the eefective rain
-                    rain = max(0, rain - config.AUTO_IGNORED_WATER_PER_DAY)
-                    # add the rain for that day
-                    rain += v['rain']
-                if rain <= config.AUTO_MIN_RAIN:
-                    rain = 0
-
-                duration = (config.AUTO_SECONDS_PER_DEGREE * w['temp_max'])
-                duration -= config.AUTO_SECONDS_PER_MM_RAIN * rain
-
-                if duration > 0:
-                    duration = max(duration, config.AUTO_MIN_SECONDS)
-                    duration = min(duration, config.AUTO_MAX_SECONDS)
-
+        if action:
+            duration = weather.auto_estimate(now)
             db.save_data(
                 'auto',
                 duration=duration,
                 datestamp=util.timestamp()
             )
+            if duration:
+                self.pump_on(duration)
 
 
 class Meter:
