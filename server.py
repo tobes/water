@@ -13,8 +13,7 @@ import weather
 
 
 devices = {}
-butt = device.Butt()
-devices['sensor 1'] = device.Meter(gpio_trigger=23, gpio_echo=24, butt=butt)
+devices['sensor 1'] = device.Meter(id=1, gpio_trigger=23, gpio_echo=24)
 devices['pump 1'] = device.Relay(gpio=18)
 devices['weather'] = device.Weather()
 
