@@ -1,3 +1,4 @@
+import json
 import time
 
 from datetime import datetime, timedelta
@@ -306,7 +307,7 @@ def get_stats():
         {'name': 'Volumes','data': stats_volumes()},
         ],
     }
-    response = make_response(output)
+    response = make_response(json.dumps(output,  separators=(',', ':')))
     response.mimetype = 'application/json'
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
