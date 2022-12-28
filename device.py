@@ -75,6 +75,7 @@ class Weather:
         self.state_time = None
         self.get_weather()
 
+        db.update_recent_weather_hourly()
         db.update_recent_weather()
 
     def get_weather(self, save=False):
@@ -101,6 +102,7 @@ class Weather:
                     datestamp=timestamp,
                 )
                 # update summary table
+                db.update_recent_weather_hourly()
                 db.update_recent_weather()
             #print(content)
         except Exception as e:
