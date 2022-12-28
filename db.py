@@ -13,7 +13,9 @@ sql_create = [
         datestamp,
         level INT,
         level2 INT,
-        accuracy REAL
+        accuracy REAL,
+        depth REAL,
+        volume REAL
     )
 ''',
 
@@ -292,6 +294,19 @@ def clean_timestamps():
          #   sql= 'UPDATE ' + TABLE + ' SET datestamp=? WHERE datestamp=?'
          #   sql_execute(sql, (new_ts, timestamp))
 
+def fix_levels():
+    sql = '''
+    SELECT * from levels WHERE depth is NULL
+    '''
+    from device import Butt
+    butt = Butt()
+    for row in sql_select(sql):
+        data = butt.calculate_stats(row[3])
+        print(row[1], row[3], data)
+        sql = '''UPDATE levels SET depth=?, volume=?
+        WHERE datestamp = ?
+        '''
+        sql_execute(sql, (data['depth'], data['volume'], row[1]))
 
 # Initiate tables
 for sql in sql_create:
@@ -302,3 +317,4 @@ if __name__ == '__main__':
     update_recent_levels()
     update_recent_weather_hourly()
     update_recent_weather()
+    fix_levels()
