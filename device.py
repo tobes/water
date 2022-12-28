@@ -214,12 +214,12 @@ class Meter:
     def __init__(self, id, gpio_trigger, gpio_echo, **kw):
         self.gpio_trigger = gpio_trigger
         self.gpio_echo = gpio_echo
-        self.butt = Butt()
         self.pulse_start = 0
         self.pulse_end = 0
         self.distance = 0
-        self.distance2 = 0
         self.accuracy = 0
+        self.depth = 0
+        self.volume = 0
         self.done = True
         self.update_time = None
         self.last_update_time = None
@@ -227,6 +227,10 @@ class Meter:
         self.save=False
         self.thread = None
         self.id = id
+
+        self.max_distance = kw.get('max_distance', 875)
+        self.min_distance = kw.get('min_distance', 105)
+        self.total_volume = kw.get('total_volume', 200)
 
         p.set_mode(gpio_trigger, pigpio.OUTPUT)
         p.write(gpio_trigger, 0)
@@ -248,10 +252,14 @@ class Meter:
                     cut = (config.METER_TICKS - 1) // 2
 
                     ticks = sorted(self.ticks)[cut:-cut]
-                    self.distance = int(sum(ticks) / len(ticks) * 0.1715)
-                    self.distance2 = int(statistics.geometric_mean(self.ticks) * 0.1715)
+                    self.distance = int(statistics.geometric_mean(self.ticks) * 0.1715)
                     self.accuracy = round(statistics.pstdev(self.ticks), 2)
                     self.update_time = util.timestamp_clean(period=5)
+                    self.depth = self.max_distance - self.distance
+                    volume = (
+                        self.depth / (self.max_distance - self.min_distance)
+                    ) * self.total_volume
+                    self.volume = round(volume, 1)
                     self.done = True
                     if self.save:
                         db.save_data(
@@ -259,8 +267,10 @@ class Meter:
                             sensor=id,
                             datestamp=self.update_time,
                             level=self.distance,
-                            level2=self.distance2,
+                            level2=self.distance,
                             accuracy=self.accuracy,
+                            depth=self.depth,
+                            volume=self.volume,
                         )
                         db.update_recent_levels()
 
@@ -297,16 +307,16 @@ class Meter:
         fast = kw.get('fast')
         if fast is not True:
             self.get_distance()
-        butt_data = self.butt.calculate_stats(self.distance2)
+
         return {
-            'depth': butt_data['depth'],
-            'volume': butt_data['volume'],
-            'distance': self.distance2,
+            'depth': self.depth,
+            'volume': self.volume,
+            'distance': self.distance,
             'accuracy': self.accuracy,
             'update_time': self.update_time,
         }
 
 if __name__ == '__main__':
 
-    d = Meter(id=2, gpio_trigger=8, gpio_echo=25, butt=Butt())
+    d = Meter(id=2, gpio_trigger=8, gpio_echo=25)
     print(d.status())
