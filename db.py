@@ -163,7 +163,7 @@ def update_level_sumary_for_date(date, sensor):
         save_or_update_data('level_summary', ('date', 'sensor'), row)
 
     sql = '''
-    SELECT datestamp, l.sensor,
+    SELECT date(datestamp) as date, l.sensor,
     depth as last_depth, volume as last_volume
     FROM levels l JOIN level_summary ls
     ON date(l.datestamp) = ls.date
