@@ -272,7 +272,7 @@ class Meter:
                             depth=self.depth,
                             volume=self.volume,
                         )
-                        update_level_sumary_for_date(
+                        db.update_level_sumary_for_date(
                             self.update_time.strftime('%Y-%m-%d'),
                             self.id,
                         )
