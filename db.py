@@ -234,8 +234,8 @@ def update_weather_hourly():
 
 
 def update_recent_levels():
-    sql_execute('DELETE FROM level_summary AS ls WHERE ls.date >= date("now","-5 day")')
-    update_levels()
+    sql_execute('DELETE FROM level_summary AS ls WHERE ls.date >= date("now","-2 day")')
+    update_missing_level_summary()
 
 
 def update_recent_weather():
