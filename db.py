@@ -257,6 +257,6 @@ for sql in sql_create:
 
 if __name__ == '__main__':
     update_recent_levels()
+    update_missing_level_summary()
     update_recent_weather_hourly()
     update_recent_weather()
-    fix_levels()
