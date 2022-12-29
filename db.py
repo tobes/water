@@ -150,6 +150,7 @@ def update_level_sumary_for_date(date, sensor):
     WHERE date(datestamp) = :date AND sensor = :sensor
     ) as accuracy,
     date(datestamp) as date,
+    sensor,
     max(volume) as max_volume,
     min(volume) as min_volume,
     max(depth) as max_depth,
@@ -163,7 +164,7 @@ def update_level_sumary_for_date(date, sensor):
         save_or_update_data('level_summary', ('date', 'sensor'), row)
 
     sql = '''
-    SELECT date(datestamp) as date, l.sensor,
+    SELECT date(datestamp) as date, l.sensor as sensor,
     depth as last_depth, volume as last_volume
     FROM levels l JOIN level_summary ls
     ON date(l.datestamp) = ls.date
