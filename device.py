@@ -264,7 +264,7 @@ class Meter:
                     if self.save:
                         db.save_data(
                             'levels',
-                            sensor=id,
+                            sensor=self.id,
                             datestamp=self.update_time,
                             level=self.distance,
                             level2=self.distance,
@@ -272,7 +272,10 @@ class Meter:
                             depth=self.depth,
                             volume=self.volume,
                         )
-                        db.update_recent_levels()
+                        update_level_sumary_for_date(
+                            self.update_time.strftime('%Y-%m-%d'),
+                            self.id,
+                        )
 
                     if self.thread == None:
                         seconds = (config.LEVEL_INTERVAL - (time.time() % config.LEVEL_INTERVAL))

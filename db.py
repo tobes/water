@@ -4,7 +4,6 @@ from contextlib import contextmanager
 
 import config
 
-butt = None
 
 sql_create = [
 '''
@@ -23,13 +22,14 @@ sql_create = [
     CREATE TABLE IF NOT EXISTS level_summary(
         sensor INT,
         date,
-        max_depth INT,
-        min_depth INT,
-        last_depth INT,
-        max_volume INT,
-        min_volume INT,
-        last_volume INT,
-        accuracy REAL
+        max_depth REAL,
+        min_depth REAL,
+        last_depth REAL,
+        max_volume REAL,
+        min_volume REAL,
+        last_volume REAL,
+        accuracy REAL,
+        PRIMARY KEY (sensor, date)
     )
 ''',
 
@@ -141,63 +141,43 @@ def save_or_update_data(table, primary_key, data):
     sql_execute(sql, tuple(v for v in data.values()))
 
 
-def update_levels_for_date(date, sensor):
+def update_level_sumary_for_date(date, sensor):
 
-    # FIXME use proper butt
-    global butt
-    if butt is None:
-        from device import Butt
-        butt = Butt()
+    print('update levels for sensor', sensor, date)
 
-    sql_max_accurracy = '''
-        SELECT min(accuracy)
-        FROM levels
-        WHERE date(datestamp) = ?
-        AND sensor = ?
+    sql = '''
+    SELECT (SELECT  min(accuracy) FROM levels
+    WHERE date(datestamp) = :date AND sensor = :sensor
+    ) as accuracy,
+    date(datestamp) as date,
+    max(volume) as max_volume,
+    min(volume) as min_volume,
+    max(depth) as max_depth,
+    min(depth) as min_depth
+    FROM levels l
+    WHERE date(datestamp) = :date AND sensor = :sensor
+    AND l.accuracy = accuracy;
     '''
+    params = {'date': date, 'sensor': sensor}
+    for row in sql_select(sql, params, as_dict=True):
+        save_or_update_data('level_summary', ('date', 'sensor'), row)
 
-    sql_accurate = '''
-        SELECT max(level2) as max, min(level2) as min,
-        (SELECT (level2) FROM levels WHERE
-          date(datestamp) = date(l.datestamp)
-          AND accuracy = ?
-          ORDER BY datestamp DESC
-            LIMIT 1
-        ) AS last
-        FROM levels l
-        WHERE accuracy = ?
-        AND date(datestamp) = ?
-        AND sensor = ?
+    sql = '''
+    SELECT datestamp, l.sensor,
+    depth as last_depth, volume as last_volume
+    FROM levels l JOIN level_summary ls
+    ON date(l.datestamp) = ls.date
+    AND l.sensor = ls.sensor
+    AND l.accuracy = ls.accuracy
+    WHERE date(datestamp) = :date AND l.sensor = :sensor
+    ORDER BY datestamp DESC
+    LIMIT 1
     '''
-
-    def level_record(row, date=None, sensor=None, accuracy=None):
-        min_ = butt.calculate_stats(row[0])
-        max_ = butt.calculate_stats(row[1])
-        last = butt.calculate_stats(row[2])
-        return dict(
-            date=date,
-            sensor=sensor,
-            min_depth=min_['depth'],
-            max_depth=max_['depth'],
-            min_volume=min_['volume'],
-            max_volume=max_['volume'],
-            last_depth=last['depth'],
-            last_volume=last['volume'],
-            accuracy=accuracy,
-        )
-
-    with sql_run(sql_max_accurracy, (date, sensor)) as result:
-        for row in result:
-            max_accuracy = row[0]
-
-    with sql_run(sql_accurate, (max_accuracy, max_accuracy, date, sensor)) as result:
-        for row in result:
-            record = level_record(row, date=date, sensor=sensor, accuracy=0)
-            save_data('level_summary', **record)
-            print('update levels for', date, 'accuracy', max_accuracy)
+    for row in sql_select(sql, params, as_dict=True):
+        save_or_update_data('level_summary', ('date', 'sensor'), row)
 
 
-def update_levels():
+def update_missing_level_summary():
     sql = '''
         SELECT DISTINCT date(datestamp) as date, l.sensor
         FROM levels l
@@ -208,8 +188,7 @@ def update_levels():
     '''
 
     for update in sql_select(sql):
-        print('update levels for', update[0])
-        update_levels_for_date(*update)
+        update_level_sumary_for_date(*update)
 
 
 def update_weather():
@@ -270,43 +249,6 @@ def update_recent_weather_hourly():
     )
     return update_weather_hourly()
 
-
-def clean_timestamps():
-    TABLE = "weather"
-    PERIOD = config.WEATHER_INTERVAL // 60
-   # TS = {'hours': -1}
-    TS = {}
-
-
-    import util
-    from datetime import datetime
-    sql= 'SELECT datestamp FROM ' + TABLE +' WHERE datestamp > "2022-12-19 19:00:00"'
-    timestamps = []
-    with sql_run(sql) as result:
-        for (timestamp, ) in result:
-            timestamps.append(timestamp)
-
-    for timestamp in timestamps:
-        ts = datetime.fromisoformat(timestamp)
-        new_ts = util.timestamp_clean(ts, period=PERIOD, **TS)
-        if timestamp != new_ts:
-            print('%r %r'%(timestamp,new_ts))
-         #   sql= 'UPDATE ' + TABLE + ' SET datestamp=? WHERE datestamp=?'
-         #   sql_execute(sql, (new_ts, timestamp))
-
-def fix_levels():
-    sql = '''
-    SELECT * from levels WHERE depth is NULL
-    '''
-    from device import Butt
-    butt = Butt()
-    for row in sql_select(sql):
-        data = butt.calculate_stats(row[3])
-        print(row[1], row[3], data)
-        sql = '''UPDATE levels SET depth=?, volume=?
-        WHERE datestamp = ?
-        '''
-        sql_execute(sql, (data['depth'], data['volume'], row[1]))
 
 # Initiate tables
 for sql in sql_create:
