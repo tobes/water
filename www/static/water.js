@@ -171,6 +171,7 @@ function update_status(automated, first) {
 
 
 function update_stats() {
+  clear_stats_timeout();
   // get stats
   make_http_request('/stats', update_stats_callback);
 }
