@@ -131,7 +131,7 @@ def stats_auto():
     utc = datetime.utcnow()
     dt = utc.replace(hour=19) - timedelta(days=STATS_MAX_DAYS)
     one_day = timedelta(days=1)
-    while dt < utc:
+    while dt <= utc:
         date = dt.strftime('%Y-%m-%d')
         time = dt.strftime('%H:%M')
         auto = weather.auto_estimate(dt)
