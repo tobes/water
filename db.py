@@ -78,6 +78,7 @@ sql_create = [
 
 @contextmanager
 def sql_run(sql, data=None, row_factory=False):
+    """Run provide sql in a context manager"""
     con = sqlite3.connect(config.SQLITE_DB)
     if row_factory:
         con.row_factory = sqlite3.Row
@@ -91,11 +92,13 @@ def sql_run(sql, data=None, row_factory=False):
 
 
 def sql_execute(sql, data=None):
+    """execute sql helper"""
     with sqlite3.connect(config.SQLITE_DB) as con:
         con.execute(sql, data or tuple())
 
 
 def sql_select(sql, data=None, row_factory=False, as_dict=False, as_lists=False):
+    """Do a sql select and return result in a few useful formats"""
     with sqlite3.connect(config.SQLITE_DB) as con:
         if row_factory or as_dict:
             con.row_factory = sqlite3.Row
@@ -109,6 +112,7 @@ def sql_select(sql, data=None, row_factory=False, as_dict=False, as_lists=False)
 
 
 def save_data(table, **kw):
+    """save data to given table"""
     sql = 'INSERT INTO %r (' % table
     sql += ', '.join(['%r' % k for k in kw])
     sql += ') VALUES ('
@@ -121,6 +125,7 @@ def save_data(table, **kw):
 
 
 def save_or_update_data(table, primary_key, data):
+    """save data to given table or update values if the row exists"""
     if isinstance(data, sqlite3.Row):
         data = dict(data)
     insert_columns = ['%r' % k for k in data]
@@ -163,6 +168,7 @@ def update_level_sumary_for_date(date, sensor):
     for row in sql_select(sql, params, as_dict=True):
         save_or_update_data('level_summary', ('date', 'sensor'), row)
 
+    # now do the last depth/volume
     sql = '''
     SELECT date(datestamp) as date, l.sensor as sensor,
     depth as last_depth, volume as last_volume
