@@ -126,7 +126,7 @@ function update_status_display(data, automated) {
   set_element_text('message_date', datetime_format(msg_time, STATUS_DATE_OPTIONS));
 
   const icon = w.weather[0].icon;
-  document.getElementById('weather_icon').src = '/static/img/' + icon + '.png';
+  document.getElementById('weather_icon').src = '/static/img/' + icon + '.svg';
   set_element_display('loading', false);
   set_element_display('main_info', true);
   set_status_timeout();
