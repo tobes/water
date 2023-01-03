@@ -27,6 +27,10 @@ div {
   font-size: 2em;
 }
 
+#rain_div {
+  color: #2885c7;
+}
+
 #accuracy {
   font-size: .75em;
   padding: .2em 1em;
