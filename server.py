@@ -58,7 +58,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.listen()
     running = True
     while running:
-        conn, addr = s.accept()
+        try:
+            conn, addr = s.accept()
+        except KeyboardInterrupt:
+            sys.exit()
         with conn:
             print('Connected by', addr)
             while True:

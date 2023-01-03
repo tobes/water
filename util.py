@@ -62,5 +62,6 @@ def thread_runner(function, interval=None, seconds=None, kwargs=None):
         if seconds < 1:
             seconds += interval
     thread = threading.Timer(seconds, function, kwargs=kwargs)
+    thread.daemon = True
     thread.start()
     return thread
