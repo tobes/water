@@ -1,4 +1,3 @@
-import json
 import os
 import statistics
 import time
@@ -91,7 +90,6 @@ class Weather:
         try:
             content = urlopen(config.WEATHER_API_URL + query_string).read().decode('utf-8')
 
-            self.state = json.loads(content)
             # create timestamp for start of the period (1 hour)
             timestamp = util.timestamp_clean(period=60, hours=-1)
             self.update_time = timestamp
@@ -104,7 +102,7 @@ class Weather:
                 # update summary table
                 db.update_recent_weather_hourly()
                 db.update_recent_weather()
-            #print(content)
+            self.state = weather.weather_json_2_dict(content, full=True)
         except Exception as e:
             print('ERROR:',e)
 

@@ -1,5 +1,6 @@
 import json
 
+from datetime import datetime
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -9,7 +10,7 @@ import util
 
 
 
-def weather_json_2_dict(json_data):
+def weather_json_2_dict(json_data, full=False):
     """
     convert weather json into a more useful dict
     """
@@ -24,6 +25,14 @@ def weather_json_2_dict(json_data):
         'pressure': main.get('pressure'),
         'rain': rain,
     }
+    if full:
+        info['icon'] = data.get('weather', [{}])[0].get('icon', 'unknown')
+        sql = 'SELECT rain FROM weather_summary WHERE date = ?'
+        date = datetime.now().strftime('%Y-%m-%d')
+        result = db.sql_select(sql, (date,))
+        if result:
+            info['rain_today'] = result[0][0]
+
     return info
 
 
