@@ -110,13 +110,13 @@ function update_status_display(data, automated) {
     return;
   }
   STATE.status_last_data = data.epoch_time * 1000;
-  const w = data.weather.state;
+  const weather = data.weather.state;
   const pump = data['pump 1'];
   const sensor = data['sensor 1'];
 
   update_accuracy_text(accuracy_2_text(sensor.accuracy), ' accuracy');
 
-  set_element_text('temp', w.main.temp.toFixed(1));
+  set_element_text('temp', weather.temp.toFixed(1));
   set_element_text('depth', sensor.depth);
   set_element_text('volume', sensor.volume);
   set_element_text('pump_state', 'Pump ' + pump.state);
@@ -125,7 +125,7 @@ function update_status_display(data, automated) {
   set_element_text('message_time', datetime_format(msg_time, STATUS_TIME_OPTIONS));
   set_element_text('message_date', datetime_format(msg_time, STATUS_DATE_OPTIONS));
 
-  const icon = w.weather[0].icon;
+  const icon = weather.icon;
   document.getElementById('weather_icon').src = '/static/img/' + icon + '.svg';
   set_element_display('loading', false);
   set_element_display('main_info', true);
