@@ -117,8 +117,8 @@ function update_status_display(data, automated) {
   update_accuracy_text(accuracy_2_text(sensor.accuracy), ' accuracy');
 
   set_element_text('temp', weather.temp.toFixed(1));
-  set_element_text('rain', weather.rain.toFixed(1));
-  set_element_display('rain_div', weather.rain > 0);
+  set_element_text('rain', weather.rain_today.toFixed(1));
+  set_element_display('rain_div', weather.rain_today > 0);
 
   set_element_text('depth', sensor.depth);
   set_element_text('volume', sensor.volume);
