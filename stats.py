@@ -279,7 +279,7 @@ def stats_weather():
                     'color': '#B0E0E6',
                 },
                 'ticks': {
-                    'color': '#99ccff',
+                    'color': '#2885c7',
                 },
                 'options':{
                     'beginAtZero': True,
