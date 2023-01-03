@@ -207,8 +207,14 @@ function display_seconds(value) {
 
 function get_option(option) {
   // get option value
-  const selected_option = document.querySelector('[data-type=' + option + '].selected');
-  return selected_option.dataset.value;
+  let selected_option = document.querySelector('[data-type=' + option + '].selected');
+  if (selected_option === null){
+    // none selected just grab the first
+    selected_option = document.querySelector('[data-type=' + option + ']');
+  }
+  const value = selected_option.dataset.value;
+  localStorage.setItem(option, value);
+  return value;
 }
 
 
@@ -235,11 +241,11 @@ function show_selected() {
 
   let el;
   switch (display) {
-    case 'graph':
+    case 'Graph':
       el = document.createElement('div');
       el.appendChild(create_graph(data.graph, data.cols, values, cutoff));
       break;
-    case 'table':
+    case 'Table':
       el = create_table(data.cols, values);
       break;
     case 'no data':
@@ -482,17 +488,24 @@ function stale_time(data, limit) {
 }
 
 
-function build_button(group, name) {
+function build_button(type, name, prefix='') {
   // create buttons if missing
-  if (document.querySelector('[data-value=' + name + ']') === null) {
+  if (document.querySelector('[data-value="' + name + '"]') === null) {
+    const value = localStorage.getItem(type);
     const button = document.createElement('li');
-    button.dataset.type = 'stat';
+    button.dataset.type = type;
     button.dataset.value = name;
-    button.innerText = name;
+    button.innerText = name + prefix;
 
-    const button_group = document.getElementById(group);
-    // first button selected
-    if (button_group.childNodes.length === 0) {
+    const button_group = document.getElementById(type);
+    // saved or first button selected
+    let selected;
+    if (value){
+      selected = (value === name);
+    } else {
+      selected = (button_group.childNodes.length === 0);
+    }
+    if (selected) {
       button.classList.add('selected');
     }
     button.addEventListener('click', option_button_click);
@@ -519,7 +532,7 @@ function update_stats_callback(data) {
     const name = row.name;
     // save the stat data
     STATE.data_cache[name] = row.data;
-    build_button('options', name);
+    build_button('stat', name);
   });
 
   set_element_display('visualization', true);
@@ -661,13 +674,21 @@ function init() {
   update_status(true);
   update_stats();
 
+  // buttons
+  const DISPLAY = ['Graph', 'Table'];
+  DISPLAY.forEach(item => {
+    build_button('display', item);
+  });
+
+  const PERIOD = ['7', '14', '30', '60', '90'];
+  PERIOD.forEach(item => {
+    build_button('period', item, ' days');
+  });
+
   document.addEventListener('scroll', move_scroll_top);
   document.getElementById('scroll_top').addEventListener('click', scroll_top);
   document.getElementById('main_info').addEventListener('click', update_status);
   document.getElementById('data_update_time').addEventListener('click', update_stats);
-  document.querySelectorAll('li').forEach(
-    el => el.addEventListener('click', option_button_click)
-  );
 
   document.onvisibilitychange = () => {
     if (document.visibilityState === 'hidden') {
