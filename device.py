@@ -258,6 +258,11 @@ class Meter:
                         self.depth / (self.max_distance - self.min_distance)
                     ) * self.total_volume
                     self.volume = round(volume, 1)
+
+                    # ensure that values are always at least zero
+                    self.depth = max(self.depth, 0)
+                    self.volume = max(self.volume, 0)
+
                     self.done = True
                     if self.save:
                         db.save_data(

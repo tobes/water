@@ -11,6 +11,16 @@ import weather
 from config import STATS_MAX_DAYS
 
 
+def fix_values(values):
+
+    fixed = []
+    for row in values:
+        row = list(row)
+        for i in [1, 2, 3]:
+            row[i] = max(0, row[i])
+        fixed.append(tuple(row))
+    return fixed
+
 def stats_depths():
     sql = '''
         SELECT date, min_depth, max_depth, last_depth
@@ -62,7 +72,7 @@ def stats_depths():
 
     output = {
         'cols': cols,
-        'values': values,
+        'values': fix_values(values),
         'graph':graph,
     }
     return output
@@ -119,7 +129,7 @@ def stats_volumes():
 
     output = {
         'cols': cols,
-        'values': values,
+        'values': fix_values(values),
         'graph':graph,
     }
     return output
