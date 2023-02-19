@@ -81,7 +81,13 @@ def auto_estimate(timestamp=None):
     if duration < 0:
         duration = 0
 
+    # nice round numbers
     duration -= duration % 5
-    if duration > config.AUTO_MIN_SECONDS:
-        duration = min(duration, config.AUTO_MAX_SECONDS)
+
+    # enforce max and min values
+    if duration < config.AUTO_MIN_SECONDS:
+        duration = 0
+    if duration > config.AUTO_MAX_SECONDS:
+        duration = config.AUTO_MAX_SECONDS
+
     return duration
