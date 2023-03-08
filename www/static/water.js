@@ -231,7 +231,7 @@ function show_selected() {
   const values = [];
   if (data) {
     data.values.forEach(row => {
-      if (display !== 'table' || yyyymmddToLocalDate(row[0]) > cutoff) {
+      if (display !== 'Table' || yyyymmddToLocalDate(row[0]) > cutoff) {
         values.push(row);
       }
     });
