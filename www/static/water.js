@@ -657,7 +657,7 @@ function clear_stats_timeout() {
 }
 
 function set_stats_timeout() {
-  clear_stats_timeout()
+  clear_stats_timeout();
   const last = STATE.stats_last_data;
   const delay = timeout_delay(last, UPDATE_INTERVAL_STATS);
   STATE.stats_due_time = Date.now() + delay;
